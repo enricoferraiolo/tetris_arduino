@@ -1,16 +1,26 @@
 {
-    "version": 1,
-    "author": "Uri Shaked",
-    "editor": "wokwi",
-    "parts": [
-      { "id": "uno", "type": "wokwi-arduino-uno", "top": 20, "left": 20 },
-      { "id": "lcd", "type": "wokwi-lcd1602", "top": 242, "left": 50, "attrs": {"pins": "i2c" } }
-    ],
-    "connections": [
-      ["uno:GND.2", "lcd:GND", "black", ["v14", "*", "h-20"]],
-      ["uno:5V", "lcd:VCC", "red", ["v18", "*", "h-16"]],
-      ["uno:A4", "lcd:SDA", "green", ["v22", "*", "h-12"]],
-      ["uno:A5", "lcd:SCL", "blue", ["v26", "*", "h-8"]]
-    ]
-  }
-  
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-breadboard", "id": "bb1", "top": 496.2, "left": -611.6, "attrs": {} },
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 183, "left": -183, "attrs": {} },
+    {
+      "type": "wokwi-max7219-matrix",
+      "id": "matrix1",
+      "top": -95.4,
+      "left": -30.96,
+      "attrs": { "chain": "4" }
+    },
+    { "type": "wokwi-ir-receiver", "id": "ir1", "top": 392.25, "left": -97.78, "attrs": {} },
+    { "type": "wokwi-ir-remote", "id": "remote1", "top": 67.2, "left": -537.6, "attrs": {} }
+  ],
+  "connections": [
+    [ "uno:5V", "bb1:tp.50", "red", [ "v19.1", "h100.6" ] ],
+    [ "uno:GND.2", "bb1:tn.49", "black", [ "v28.7", "h80.7" ] ],
+    [ "ir1:GND", "bb1:tn.44", "gray", [ "v0" ] ],
+    [ "bb1:tp.45", "ir1:VCC", "violet", [ "v0" ] ],
+    [ "uno:3", "ir1:DAT", "blue", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
