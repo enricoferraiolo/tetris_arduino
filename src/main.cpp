@@ -1,15 +1,19 @@
 #include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
 #include <IRremote.h>
 #include <LedControl.h>
 
-// #define PRODUCTION
+#define PRODUCTION false
 
-int receiver = 3;
-IRrecv irrecv(receiver);
+// IR receiver on digital pin 3
+const int receiverPin = 3;
+IRrecv irrecv(receiverPin);
 uint32_t last_decodedRawData = 0;
 
-// Struct per mappare codice -> nome pulsante
+// LED matrix: DIN=D12, CLK=D11, CS=D10, and 4 devices in chain
+LedControl lc = LedControl(/*DIN=*/12, /*CLK=*/11, /*CS=*/10, /*#devices=*/4);
+bool matrixOn = false;
+
+// IR code → name mapping for Wokwi TESTING remote
 struct IRCode
 {
   uint32_t code;
@@ -63,12 +67,65 @@ const IRCode PRODUCTION_CODES[] = {
     {0xAD52FF00, "8"},
     {0xB54AFF00, "9"}};
 
-// Puntatore alla mappatura attiva
 const IRCode *activeMap;
 size_t mapSize;
 
+void initializeActiveMap()
+{
+  if (PRODUCTION)
+  {
+    activeMap = PRODUCTION_CODES;
+    mapSize = sizeof(PRODUCTION_CODES) / sizeof(PRODUCTION_CODES[0]);
+  }
+  else
+  {
+    activeMap = TESTING_CODES;
+    mapSize = sizeof(TESTING_CODES) / sizeof(TESTING_CODES[0]);
+  }
+}
+
+void setup()
+{
+  initializeActiveMap();
+  Serial.begin(9600);
+  Serial.println("IR Receiver Button Decode");
+  irrecv.enableIRIn();
+  Serial.println("IR Receiver Button Decode");
+  irrecv.enableIRIn();
+
+  // Initialize each MAX7219 in the chain
+  for (int dev = 0; dev < 4; ++dev)
+  {
+    lc.shutdown(dev, false); // Wake up
+    lc.setIntensity(dev, 8); // Mid brightness (0–15)
+    lc.clearDisplay(dev);    // All LEDs off
+  }
+}
+
+void toggleMatrix(bool on)
+{
+  // For each of the 4 devices:
+  for (int dev = 0; dev < 4; ++dev)
+  {
+    if (on)
+    {
+      // Light every LED: rows 0–7, cols 0–7
+      for (int row = 0; row < 8; ++row)
+      {
+        lc.setRow(dev, row, 0xFF);
+      }
+    }
+    else
+    {
+      // Turn all off
+      lc.clearDisplay(dev);
+    }
+  }
+}
+
 void translateIR()
 {
+  // Handle REPEAT flag by reusing last_decodedRawData
   if (irrecv.decodedIRData.flags)
   {
     irrecv.decodedIRData.decodedRawData = last_decodedRawData;
@@ -82,40 +139,38 @@ void translateIR()
 
   uint32_t code = irrecv.decodedIRData.decodedRawData;
   bool found = false;
+  const char *buttonName = nullptr;
 
+  // Look up the button name
   for (size_t i = 0; i < mapSize; i++)
   {
     if (activeMap[i].code == code)
     {
-      Serial.println(activeMap[i].name);
+      buttonName = activeMap[i].name;
       found = true;
       break;
     }
   }
 
-  if (!found)
+  if (found)
+  {
+    Serial.println(buttonName);
+    // If POWER pressed, toggle the matrix
+    if (strcmp(buttonName, "POWER") == 0)
+    {
+      matrixOn = !matrixOn;
+      toggleMatrix(matrixOn);
+      Serial.print("Matrix is now ");
+      Serial.println(matrixOn ? "ON" : "OFF");
+    }
+  }
+  else
   {
     Serial.println("other button");
   }
 
   last_decodedRawData = code;
-  delay(500);
-}
-
-void setup()
-{
-  Serial.begin(9600);
-  Serial.println("IR Receiver Button Decode");
-  irrecv.enableIRIn();
-
-// Selezione della mappa attiva
-#ifdef PRODUCTION
-  activeMap = PRODUCTION_CODES;
-  mapSize = sizeof(PRODUCTION_CODES) / sizeof(IRCode);
-#else
-  activeMap = TESTING_CODES;
-  mapSize = sizeof(TESTING_CODES) / sizeof(IRCode);
-#endif
+  delay(200); // debounce
 }
 
 void loop()

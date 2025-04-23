@@ -8,8 +8,8 @@
     {
       "type": "wokwi-max7219-matrix",
       "id": "matrix1",
-      "top": -95.4,
-      "left": -30.96,
+      "top": -85.8,
+      "left": -414.96,
       "attrs": { "chain": "4" }
     },
     { "type": "wokwi-ir-receiver", "id": "ir1", "top": 392.25, "left": -97.78, "attrs": {} },
@@ -20,7 +20,12 @@
     [ "uno:GND.2", "bb1:tn.49", "black", [ "v28.7", "h80.7" ] ],
     [ "ir1:GND", "bb1:tn.44", "gray", [ "v0" ] ],
     [ "bb1:tp.45", "ir1:VCC", "violet", [ "v0" ] ],
-    [ "uno:3", "ir1:DAT", "blue", [ "v0" ] ]
+    [ "uno:3", "ir1:DAT", "blue", [ "v0" ] ],
+    [ "matrix1:CLK", "uno:11", "cyan", [ "h38.4", "v220.8" ] ],
+    [ "matrix1:V+", "bb1:tp.48", "violet", [ "h57.6", "v575.7" ] ],
+    [ "matrix1:GND", "bb1:tn.47", "gray", [ "h67.2", "v576.1" ] ],
+    [ "matrix1:DIN", "uno:12", "yellow", [ "h28.8", "v240" ] ],
+    [ "matrix1:CS", "uno:10", "limegreen", [ "h48", "v230.4" ] ]
   ],
   "dependencies": {}
 }
