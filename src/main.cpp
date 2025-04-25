@@ -5,16 +5,16 @@
 #define PRODUCTION false
 #define MAX7219_MAX_DEVICES 1
 
-// IR receiver on digital pin 3
+// Configurazione IR Receiver
 const int receiverPin = 3;
 IRrecv irrecv(receiverPin);
 uint32_t last_decodedRawData = 0;
 
-// LED matrix: DIN=D12, CLK=D11, CS=D10, and 4 devices in chain
-LedControl lc = LedControl(/*DIN=*/12, /*CLK=*/11, /*CS=*/10, /*#devices=*/4);
+// Configurazione LED Matrix
+LedControl lc = LedControl(12, 11, 10, 1); // DIN, CLK, CS, numero di dispositivi
 bool matrixOn = false;
 
-// IR code → name mapping for Wokwi TESTING remote
+// Mappatura tasti IR
 struct IRCode
 {
   uint32_t code;
@@ -71,6 +71,33 @@ const IRCode PRODUCTION_CODES[] = {
 const IRCode *activeMap;
 size_t mapSize;
 
+// Variabili del gioco
+struct Tetromino
+{
+  byte shape[4];
+  int width;
+  int height;
+};
+
+Tetromino pieces[7] = {
+    {{0b1111, 0, 0, 0}, 4, 1}, // I
+    {{0b0111, 0b0100}, 3, 2},  // J
+    {{0b1110, 0b0010}, 3, 2},  // L
+    {{0b0110, 0b0110}, 2, 2},  // O
+    {{0b0111, 0b0010}, 3, 2},  // S
+    {{0b1100, 0b0110}, 3, 2},  // T
+    {{0b1110, 0b1000}, 3, 2}   // Z
+};
+
+byte grid[8] = {0};
+Tetromino currentPiece;
+int posX, posY;
+unsigned long lastFall = 0;
+const int fallSpeed = 1000;
+bool gameActive = false;
+bool gameOver = false;
+bool gamePaused = false;
+
 void initializeActiveMap()
 {
   if (PRODUCTION)
@@ -85,93 +112,152 @@ void initializeActiveMap()
   }
 }
 
+bool checkCollision(int newX, int newY)
+{
+  for (int y = 0; y < currentPiece.height; y++)
+  {
+    for (int x = 0; x < currentPiece.width; x++)
+    {
+      if (bitRead(currentPiece.shape[y], x))
+      {
+        int gX = newX + x;
+        int gY = newY + y;
+
+        if (gX < 0 || gX >= 8 || gY >= 8)
+          return true;
+        if (gY >= 0 && bitRead(grid[gY], gX))
+          return true;
+      }
+    }
+  }
+  return false;
+}
+
+void spawnNewPiece()
+{
+  currentPiece = pieces[random(7)];
+  posX = 3;
+  posY = 0;
+  if (checkCollision(posX, posY))
+    gameOver = true;
+}
+
+void mergePiece()
+{
+  for (int y = 0; y < currentPiece.height; y++)
+  {
+    for (int x = 0; x < currentPiece.width; x++)
+    {
+      if (bitRead(currentPiece.shape[y], x))
+      {
+        int gX = posX + x;
+        int gY = posY + y;
+        if (gY >= 0 && gY < 8)
+          bitSet(grid[gY], gX);
+      }
+    }
+  }
+}
+
+void clearLines()
+{
+  for (int y = 0; y < 8; y++)
+  {
+    if (grid[y] == 0b11111111)
+    {
+      for (int yy = y; yy > 0; yy--)
+        grid[yy] = grid[yy - 1];
+      grid[0] = 0;
+    }
+  }
+}
+
+void drawMatrix()
+{
+  for (int row = 0; row < 8; row++)
+  {
+    byte output = grid[row];
+
+    for (int y = 0; y < currentPiece.height; y++)
+    {
+      if (row == posY + y)
+      {
+        for (int x = 0; x < currentPiece.width; x++)
+        {
+          if (bitRead(currentPiece.shape[y], x))
+          {
+            int px = posX + x;
+            if (px >= 0 && px < 8)
+              bitSet(output, px);
+          }
+        }
+      }
+    }
+
+    lc.setRow(0, row, output);
+  }
+}
+
+void resetGame()
+{
+  memset(grid, 0, sizeof(grid));
+  gameOver = false;
+  gamePaused = false; // reset pausa
+  spawnNewPiece();
+}
+
+void translateIR(){
+  // Debug raw code
+  Serial.print("IR raw code: 0x");
+  Serial.print(irrecv.decodedIRData.decodedRawData,HEX);
+
+  uint32_t code=irrecv.decodedIRData.decodedRawData;
+  const char* buttonName="UNKNOWN";
+  for(size_t i=0;i<mapSize;i++){
+    if(activeMap[i].code==code){ buttonName=activeMap[i].name; break; }
+  }
+  Serial.print(" - Button: "); Serial.println(buttonName);
+
+  if(strcmp(buttonName,"POWER")==0){
+    gameActive=!gameActive;
+    matrixOn=gameActive;
+    if(gameActive) { resetGame(); }
+    else { lc.clearDisplay(0); }
+  }
+  else if(strcmp(buttonName,"PAUSE")==0){
+    if(gameOver){
+      // Restart on PAUSE when game over
+      Serial.println("Restarting Game...");
+      gameActive=true;
+      matrixOn=true;
+      resetGame();
+    }
+    else if(gameActive){
+      gamePaused=!gamePaused;
+      Serial.println(gamePaused?"Game Paused":"Game Resumed");
+    }
+  }
+  else if(gameActive && !gameOver && !gamePaused){
+    if(strcmp(buttonName,"FAST BACK")==0){ if(!checkCollision(posX-1,posY)) posX--; }
+    else if(strcmp(buttonName,"FAST FORWARD")==0){ if(!checkCollision(posX+1,posY)) posX++; }
+    drawMatrix();
+  }
+
+  last_decodedRawData=code;
+  delay(200);
+}
+
 void setup()
 {
   initializeActiveMap();
   Serial.begin(9600);
-  Serial.println("IR Receiver Button Decode");
-  irrecv.enableIRIn();
-  Serial.println("IR Receiver Button Decode");
   irrecv.enableIRIn();
 
-  // Initialize each MAX7219 in the chain
-  for (int dev = 0; dev < MAX7219_MAX_DEVICES; ++dev)
-  {
-    lc.shutdown(dev, false); // Wake up
-    lc.setIntensity(dev, 8); // Mid brightness (0–15)
-    lc.clearDisplay(dev);    // All LEDs off
-  }
-}
+  lc.shutdown(0, false);
+  lc.setIntensity(0, 8);
+  lc.clearDisplay(0);
 
-void toggleMatrix(bool on)
-{
-  // For each of the devices:
-  for (int dev = 0; dev < MAX7219_MAX_DEVICES; ++dev)
-  {
-    if (on)
-    {
-      // Light every LED: rows 0–7, cols 0–7
-      for (int row = 0; row < 8; ++row)
-      {
-        lc.setRow(dev, row, 0xFF);
-      }
-    }
-    else
-    {
-      // Turn all off
-      lc.clearDisplay(dev);
-    }
-  }
-}
-
-void translateIR()
-{
-  // Handle REPEAT flag by reusing last_decodedRawData
-  if (irrecv.decodedIRData.flags)
-  {
-    irrecv.decodedIRData.decodedRawData = last_decodedRawData;
-    Serial.println("REPEAT!");
-  }
-  else
-  {
-    Serial.print("IR code: 0x");
-    Serial.println(irrecv.decodedIRData.decodedRawData, HEX);
-  }
-
-  uint32_t code = irrecv.decodedIRData.decodedRawData;
-  bool found = false;
-  const char *buttonName = nullptr;
-
-  // Look up the button name
-  for (size_t i = 0; i < mapSize; i++)
-  {
-    if (activeMap[i].code == code)
-    {
-      buttonName = activeMap[i].name;
-      found = true;
-      break;
-    }
-  }
-
-  if (found)
-  {
-    Serial.println(buttonName);
-    // If POWER pressed, toggle the matrix
-    if (strcmp(buttonName, "POWER") == 0)
-    {
-      matrixOn = !matrixOn;
-      toggleMatrix(matrixOn);
-      Serial.print("Matrix is now ");
-      Serial.println(matrixOn ? "ON" : "OFF");
-    }
-  }
-  else
-  {
-    Serial.println("other button");
-  }
-
-  last_decodedRawData = code;
-  delay(200); // debounce
+  randomSeed(analogRead(0));
 }
 
 void loop()
@@ -180,5 +266,34 @@ void loop()
   {
     translateIR();
     irrecv.resume();
+  }
+
+  if (gameActive && !gameOver && !gamePaused && (millis() - lastFall > fallSpeed))
+  {
+    if (!checkCollision(posX, posY + 1))
+    {
+      posY++;
+    }
+    else
+    {
+      mergePiece();
+      clearLines();
+      spawnNewPiece();
+    }
+    lastFall = millis();
+    drawMatrix();
+  }
+
+  if (gameOver)
+  {
+    Serial.println("Game Over! Press PAUSE to restart.");
+    for (int i = 0; i < 3; i++)
+    {
+      lc.clearDisplay(0);
+      delay(200);
+      drawMatrix();
+      delay(200);
+    }
+    gameActive = false;
   }
 }
