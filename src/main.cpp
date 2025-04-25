@@ -2,80 +2,47 @@
 #include <IRremote.h>
 #include <LedControl.h>
 #include <LiquidCrystal.h>
+#include <ir_utils.h>
 
+// Constants and configuration
 #define PRODUCTION false
-#define MAX7219_MAX_DEVICES 1
+#define MAX7219_MAX_DEVICES 1 // Max devices for the LED matrix
+#define RECEIVER_PIN 3        // Pin for IR receiver
+// LCD pin configuration
+#define LCD_RS_PIN 13
+#define LCD_E_PIN 9
+#define LCD_D4_PIN 6
+#define LCD_D5_PIN 5
+#define LCD_D6_PIN 7
+#define LCD_D7_PIN 4
+// LED matrix pin configuration
+#define MATRIX_DIN_PIN 12
+#define MATRIX_CLK_PIN 11
+#define MATRIX_CS_PIN 10
+// Game configuration
+#define MIN_FALL_SPEED 100
+#define MAX_FALL_SPEED 2000
+#define SPEED_INCREMENT 100
+#define POINTS_PER_LINE 10    // Punti per linea completata
+#define BLINK_COUNT 3         // Numero di lampeggiamenti in caso di game over
+#define BLINK_DELAY 200       // Millisecondi di ritardo tra i lampeggiamenti
+#define IR_DEBOUNCE_DELAY 200 // Millisecondi di debounce per il ricevitore IR
 
 // Configurazione LCD
-LiquidCrystal lcd(13, 9, 6, 5, 7, 4); // RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(LCD_RS_PIN, LCD_E_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);
 
 // Configurazione IR Receiver
-const int receiverPin = 3;
-IRrecv irrecv(receiverPin);
+IRrecv irRecv(RECEIVER_PIN);
 uint32_t last_decodedRawData = 0;
 
 // Configurazione LED Matrix
-LedControl lc = LedControl(12, 11, 10, 1); // DIN, CLK, CS, numero di dispositivi
+LedControl ledMatrix = LedControl(MATRIX_DIN_PIN, MATRIX_CLK_PIN, MATRIX_CS_PIN, MAX7219_MAX_DEVICES);
 bool matrixOn = false;
-
-// Mappatura tasti IR
-struct IRCode
-{
-  uint32_t code;
-  const char *name;
-};
-
-// Mappatura TESTING (Codici Wokwi)
-const IRCode TESTING_CODES[] = {
-    {0x5DA2FF00, "POWER"},
-    {0x1DE2FF00, "MENU"},
-    {0xDD22FF00, "TEST"},
-    {0xFD02FF00, "VOL+"},
-    {0x3DC2FF00, "BACK/DELETE"},
-    {0x1FE0FF00, "FAST BACK"},
-    {0x57A8FF00, "PAUSE"},
-    {0x6F90FF00, "FAST FORWARD"},
-    {0x6798FF00, "VOL-"},
-    {0x4FB0FF00, "C/CLEAR"},
-    {0x9768FF00, "0"},
-    {0xCF30FF00, "1"},
-    {0xE718FF00, "2"},
-    {0x857AFF00, "3"},
-    {0xEF10FF00, "4"},
-    {0xC738FF00, "5"},
-    {0xA55AFF00, "6"},
-    {0xBD42FF00, "7"},
-    {0xB54AFF00, "8"},
-    {0xAD52FF00, "9"}};
-
-// Mappatura PRODUCTION (Codici reali)
-const IRCode PRODUCTION_CODES[] = {
-    {0xBA45FF00, "POWER"},
-    {0xB847FF00, "FUNC/STOP"},
-    {0xB946FF00, "VOL+"},
-    {0xBB44FF00, "FAST BACK"},
-    {0xBF40FF00, "PAUSE"},
-    {0xBC43FF00, "FAST FORWARD"},
-    {0xF807FF00, "DOWN"},
-    {0xEA15FF00, "VOL-"},
-    {0xF609FF00, "UP"},
-    {0xE619FF00, "EQ"},
-    {0xF20DFF00, "ST/REPT"},
-    {0xE916FF00, "0"},
-    {0xF30CFF00, "1"},
-    {0xE718FF00, "2"},
-    {0xA15EFF00, "3"},
-    {0xF708FF00, "4"},
-    {0xE31CFF00, "5"},
-    {0xA55AFF00, "6"},
-    {0xBD42FF00, "7"},
-    {0xAD52FF00, "8"},
-    {0xB54AFF00, "9"}};
 
 const IRCode *activeMap;
 size_t mapSize;
 
-// Variabili del gioco
+// Definizione della struttura Tetromino
 struct Tetromino
 {
   byte shape[4];
@@ -83,7 +50,8 @@ struct Tetromino
   int height;
 };
 
-Tetromino pieces[7] = {
+// Definizione delle forme dei tetromini
+const Tetromino TETROMINO_SHAPES[7] = {
     {{0b1111, 0, 0, 0}, 4, 1}, // I
     {{0b0111, 0b0100}, 3, 2},  // J
     {{0b1110, 0b0010}, 3, 2},  // L
@@ -93,6 +61,7 @@ Tetromino pieces[7] = {
     {{0b1110, 0b1000}, 3, 2}   // Z
 };
 
+// Variabili del gioco
 byte grid[8] = {0};
 Tetromino currentPiece;
 int posX, posY;
@@ -103,11 +72,79 @@ bool gameOver = false;
 bool gamePaused = false;
 int score = 0;
 
+// Prototipi
+void initializeLCD();
+void initializeActiveMap();
+bool checkCollision(int newX, int newY);
+void spawnNewPiece();
+void mergePiece();
+void clearLines();
+void drawMatrix();
+void resetGame();
+void translateIR();
+void handleGameOver();
+void updateSpeedDisplay();
+void toggleGamePause();
+void toggleGameActive();
+
+void setup()
+{
+  Serial.begin(9600);
+
+  // Inizializzazioni
+  initializeActiveMap();
+  irRecv.enableIRIn();
+
+  // Inizializzazione della matrice LED
+  ledMatrix.shutdown(0, false);
+  ledMatrix.setIntensity(0, 8);
+  ledMatrix.clearDisplay(0);
+
+  // Inizializzazione random
+  randomSeed(analogRead(0));
+
+  // Inizializzazione del display LCD
+  lcd.begin(16, 2);
+  initializeLCD();
+}
+
+void loop()
+{
+  // Gestione dell'input IR
+  if (irRecv.decode())
+  {
+    translateIR();
+    irRecv.resume();
+  }
+
+  // Logica di caduta del pezzo
+  if (gameActive && !gameOver && !gamePaused && (millis() - lastFall > fallSpeed))
+  {
+    if (!checkCollision(posX, posY + 1))
+    {
+      posY++;
+    }
+    else
+    {
+      mergePiece();
+      clearLines();
+      spawnNewPiece();
+    }
+    lastFall = millis();
+    drawMatrix();
+  }
+
+  // Gestione del game over
+  if (gameOver)
+  {
+    handleGameOver();
+  }
+}
+
 void initializeLCD()
 {
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.begin(16, 2);
   lcd.print("Tetris IR Remote");
   lcd.setCursor(0, 1);
   lcd.print("POWER to start");
@@ -138,10 +175,15 @@ bool checkCollision(int newX, int newY)
         int gX = newX + x;
         int gY = newY + y;
 
+        // Verifica collisioni con i bordi e i pezzi già presenti
         if (gX < 0 || gX >= 8 || gY >= 8)
+        {
           return true;
+        }
         if (gY >= 0 && bitRead(grid[gY], gX))
+        {
           return true;
+        }
       }
     }
   }
@@ -150,11 +192,15 @@ bool checkCollision(int newX, int newY)
 
 void spawnNewPiece()
 {
-  currentPiece = pieces[random(7)];
+  currentPiece = TETROMINO_SHAPES[random(7)];
   posX = 3;
   posY = 0;
+
+  // Verifica se il nuovo pezzo può essere posizionato (game over check)
   if (checkCollision(posX, posY))
+  {
     gameOver = true;
+  }
 }
 
 void mergePiece()
@@ -167,8 +213,11 @@ void mergePiece()
       {
         int gX = posX + x;
         int gY = posY + y;
+
         if (gY >= 0 && gY < 8)
+        {
           bitSet(grid[gY], gX);
+        }
       }
     }
   }
@@ -180,16 +229,20 @@ void clearLines()
   {
     if (grid[y] == 0xFF)
     {
-      // linea completa
-      score += 10; // incrementa punteggio
-      // aggiorna LCD
+      // Linea completa
+      score += POINTS_PER_LINE;
+
+      // Aggiorna LCD con il punteggio
       lcd.setCursor(0, 1);
       lcd.print("Score: ");
       lcd.print(score);
       lcd.print("  ");
-      // rialza tutte le righe sopra
+
+      // Rialza tutte le righe sopra
       for (int yy = y; yy > 0; yy--)
+      {
         grid[yy] = grid[yy - 1];
+      }
       grid[0] = 0;
     }
   }
@@ -201,6 +254,7 @@ void drawMatrix()
   {
     byte output = grid[row];
 
+    // Aggiungi il pezzo corrente alla visualizzazione
     for (int y = 0; y < currentPiece.height; y++)
     {
       if (row == posY + y)
@@ -211,13 +265,15 @@ void drawMatrix()
           {
             int px = posX + x;
             if (px >= 0 && px < 8)
+            {
               bitSet(output, px);
+            }
           }
         }
       }
     }
 
-    lc.setRow(0, row, output);
+    ledMatrix.setRow(0, row, output);
   }
 }
 
@@ -225,15 +281,17 @@ void resetGame()
 {
   memset(grid, 0, sizeof(grid));
   gameOver = false;
-  gamePaused = false; // reset pausa
-  score = 0;          // reset punteggio
-  // mostra punteggio iniziale
+  gamePaused = false;
+  score = 0;
+
+  // Mostra punteggio iniziale
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Speed: ");
   lcd.print(fallSpeed);
   lcd.setCursor(0, 1);
   lcd.print("Score: 0      ");
+
   spawnNewPiece();
 }
 
@@ -241,10 +299,12 @@ void translateIR()
 {
   // Debug raw code
   Serial.print("IR raw code: 0x");
-  Serial.print(irrecv.decodedIRData.decodedRawData, HEX);
+  Serial.print(irRecv.decodedIRData.decodedRawData, HEX);
 
-  uint32_t code = irrecv.decodedIRData.decodedRawData;
+  uint32_t code = irRecv.decodedIRData.decodedRawData;
   const char *buttonName = "UNKNOWN";
+
+  // Trova il nome del pulsante
   for (size_t i = 0; i < mapSize; i++)
   {
     if (activeMap[i].code == code)
@@ -253,22 +313,14 @@ void translateIR()
       break;
     }
   }
+
   Serial.print(" - Button: ");
   Serial.println(buttonName);
 
+  // Gestione dei tasti
   if (strcmp(buttonName, "POWER") == 0)
   {
-    gameActive = !gameActive;
-    matrixOn = gameActive;
-    if (gameActive)
-    {
-      resetGame();
-    }
-    else
-    {
-      lc.clearDisplay(0);
-      initializeLCD();
-    }
+    toggleGameActive();
   }
   else if (strcmp(buttonName, "PAUSE") == 0)
   {
@@ -282,132 +334,128 @@ void translateIR()
     }
     else if (gameActive)
     {
-      gamePaused = !gamePaused;
-      Serial.println(gamePaused ? "Game Paused" : "Game Resumed");
-      if (gamePaused)
-      {
-        lcd.setCursor(0, 0);
-        lcd.print("Game Paused     ");
-        lcd.setCursor(0, 1);
-        lcd.print("Score: ");
-        lcd.print(score);
-        lc.clearDisplay(0);
-      }
-      else
-      {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Speed: ");
-        lcd.print(fallSpeed);
-        lcd.setCursor(0, 1);
-        lcd.print("Score: ");
-        lcd.print(score); // mostra punteggio
-        drawMatrix();
-      }
+      toggleGamePause();
     }
-  }
-  else if (strcmp(buttonName, "VOL+") == 0 && gameActive && !gameOver)
-  {
-    if (fallSpeed > 100)
-      fallSpeed -= 100;
-    Serial.print("Speed increased, fall interval: ");
-    Serial.println(fallSpeed);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Speed: ");
-    lcd.print(fallSpeed);
-    lcd.setCursor(0, 1);
-    lcd.print("Score: ");
-    lcd.print(score); 
-  }
-  else if (strcmp(buttonName, "VOL-") == 0 && gameActive && !gameOver)
-  {
-    if (fallSpeed < 2000)
-      fallSpeed += 100;
-    Serial.print("Speed decreased, fall interval: ");
-    Serial.println(fallSpeed);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Speed: ");
-    lcd.print(fallSpeed);
-    lcd.setCursor(0, 1);
-    lcd.print("Score: ");
-    lcd.print(score); 
   }
   else if (gameActive && !gameOver && !gamePaused)
   {
-    if (strcmp(buttonName, "FAST BACK") == 0)
+    if (strcmp(buttonName, "VOL+") == 0)
     {
+      // Aumenta velocità
+      if (fallSpeed > MIN_FALL_SPEED)
+      {
+        fallSpeed -= SPEED_INCREMENT;
+      }
+      updateSpeedDisplay();
+    }
+    else if (strcmp(buttonName, "VOL-") == 0)
+    {
+      // Diminuisci velocità
+      if (fallSpeed < MAX_FALL_SPEED)
+      {
+        fallSpeed += SPEED_INCREMENT;
+      }
+      updateSpeedDisplay();
+    }
+    else if (strcmp(buttonName, "FAST BACK") == 0)
+    {
+      // Sposta a sinistra
       if (!checkCollision(posX - 1, posY))
+      {
         posX--;
+      }
+      drawMatrix();
     }
     else if (strcmp(buttonName, "FAST FORWARD") == 0)
     {
+      // Sposta a destra
       if (!checkCollision(posX + 1, posY))
+      {
         posX++;
+      }
+      drawMatrix();
     }
-    drawMatrix();
   }
 
   last_decodedRawData = code;
-  delay(200);
+  delay(IR_DEBOUNCE_DELAY);
 }
 
-void setup()
+void handleGameOver()
 {
-  initializeActiveMap();
-  Serial.begin(9600);
-  irrecv.enableIRIn();
+  Serial.println("Game Over! Press PAUSE to restart.");
 
-  lc.shutdown(0, false);
-  lc.setIntensity(0, 8);
-  lc.clearDisplay(0);
+  lcd.setCursor(0, 0);
+  lcd.print("Final score: ");
+  lcd.print(score);
+  lcd.setCursor(0, 1);
+  lcd.print("PAUSE to restart");
 
-  randomSeed(analogRead(0));
-
-  initializeLCD();
-}
-
-void loop()
-{
-  if (irrecv.decode())
+  // Lampeggia per indicare game over
+  for (int i = 0; i < BLINK_COUNT; i++)
   {
-    translateIR();
-    irrecv.resume();
+    ledMatrix.clearDisplay(0);
+    delay(BLINK_DELAY);
+    drawMatrix();
+    delay(BLINK_DELAY);
   }
 
-  if (gameActive && !gameOver && !gamePaused && (millis() - lastFall > fallSpeed))
+  gameActive = false;
+}
+
+void updateSpeedDisplay()
+{
+  Serial.print("Speed changed, fall interval: ");
+  Serial.println(fallSpeed);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Speed: ");
+  lcd.print(fallSpeed);
+  lcd.setCursor(0, 1);
+  lcd.print("Score: ");
+  lcd.print(score);
+}
+
+void toggleGamePause()
+{
+  gamePaused = !gamePaused;
+  Serial.println(gamePaused ? "Game Paused" : "Game Resumed");
+
+  if (gamePaused)
   {
-    if (!checkCollision(posX, posY + 1))
-    {
-      posY++;
-    }
-    else
-    {
-      mergePiece();
-      clearLines();
-      spawnNewPiece();
-    }
-    lastFall = millis();
+    lcd.setCursor(0, 0);
+    lcd.print("Game Paused     ");
+    lcd.setCursor(0, 1);
+    lcd.print("Score: ");
+    lcd.print(score);
+    ledMatrix.clearDisplay(0);
+  }
+  else
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Speed: ");
+    lcd.print(fallSpeed);
+    lcd.setCursor(0, 1);
+    lcd.print("Score: ");
+    lcd.print(score);
     drawMatrix();
   }
+}
 
-  if (gameOver)
+void toggleGameActive()
+{
+  gameActive = !gameActive;
+  matrixOn = gameActive;
+
+  if (gameActive)
   {
-    Serial.println("Game Over! Press PAUSE to restart.");
-    lcd.setCursor(0, 0);
-    lcd.print("Final score: ");
-    lcd.print(score);
-    lcd.setCursor(0, 1);
-    lcd.print("PAUSE to restart");
-
-    for (int i = 0; i < 3; i++)
-    {
-      lc.clearDisplay(0);
-      delay(200);
-      drawMatrix();
-      delay(200);
-    }
-    gameActive = false;
+    resetGame();
+  }
+  else
+  {
+    ledMatrix.clearDisplay(0);
+    initializeLCD();
   }
 }
