@@ -1,9 +1,13 @@
 #include <Arduino.h>
 #include <IRremote.h>
 #include <LedControl.h>
+#include <LiquidCrystal.h>
 
 #define PRODUCTION false
 #define MAX7219_MAX_DEVICES 1
+
+// Configurazione LCD
+LiquidCrystal lcd(13, 9, 6, 5, 7, 4); // RS, E, D4, D5, D6, D7
 
 // Configurazione IR Receiver
 const int receiverPin = 3;
@@ -206,53 +210,94 @@ void resetGame()
   spawnNewPiece();
 }
 
-void translateIR(){
+void translateIR()
+{
   // Debug raw code
   Serial.print("IR raw code: 0x");
-  Serial.print(irrecv.decodedIRData.decodedRawData,HEX);
+  Serial.print(irrecv.decodedIRData.decodedRawData, HEX);
 
-  uint32_t code=irrecv.decodedIRData.decodedRawData;
-  const char* buttonName="UNKNOWN";
-  for(size_t i=0;i<mapSize;i++){
-    if(activeMap[i].code==code){ buttonName=activeMap[i].name; break; }
+  uint32_t code = irrecv.decodedIRData.decodedRawData;
+  const char *buttonName = "UNKNOWN";
+  for (size_t i = 0; i < mapSize; i++)
+  {
+    if (activeMap[i].code == code)
+    {
+      buttonName = activeMap[i].name;
+      break;
+    }
   }
-  Serial.print(" - Button: "); Serial.println(buttonName);
+  Serial.print(" - Button: ");
+  Serial.println(buttonName);
 
-  if(strcmp(buttonName,"POWER")==0){
-    gameActive=!gameActive;
-    matrixOn=gameActive;
-    if(gameActive) { resetGame(); }
-    else { lc.clearDisplay(0); }
-  }
-  else if(strcmp(buttonName,"PAUSE")==0){
-    if(gameOver){
-      // Restart on PAUSE when game over
-      Serial.println("Restarting Game...");
-      gameActive=true;
-      matrixOn=true;
+  if (strcmp(buttonName, "POWER") == 0)
+  {
+    gameActive = !gameActive;
+    matrixOn = gameActive;
+    if (gameActive)
+    {
       resetGame();
     }
-    else if(gameActive){
-      gamePaused=!gamePaused;
-      Serial.println(gamePaused?"Game Paused":"Game Resumed");
+    else
+    {
+      lc.clearDisplay(0);
     }
   }
-  else if(strcmp(buttonName,"VOL+")==0 && gameActive && !gameOver){
-    if(fallSpeed > 100) fallSpeed -= 100;
-    Serial.print("Speed increased, fall interval: "); Serial.println(fallSpeed);
+  else if (strcmp(buttonName, "PAUSE") == 0)
+  {
+    if (gameOver)
+    {
+      // Restart on PAUSE when game over
+      Serial.println("Restarting Game...");
+      gameActive = true;
+      matrixOn = true;
+      resetGame();
+    }
+    else if (gameActive)
+    {
+      gamePaused = !gamePaused;
+      Serial.println(gamePaused ? "Game Paused" : "Game Resumed");
+    }
   }
-  else if(strcmp(buttonName,"VOL-")==0 && gameActive && !gameOver){
-    if(fallSpeed < 2000) fallSpeed += 100;
-    Serial.print("Speed decreased, fall interval: "); Serial.println(fallSpeed);
+  else if (strcmp(buttonName, "VOL+") == 0 && gameActive && !gameOver)
+  {
+    if (fallSpeed > 100)
+      fallSpeed -= 100;
+    Serial.print("Speed increased, fall interval: ");
+    Serial.println(fallSpeed);
   }
-  else if(gameActive && !gameOver && !gamePaused){
-    if(strcmp(buttonName,"FAST BACK")==0){ if(!checkCollision(posX-1,posY)) posX--; }
-    else if(strcmp(buttonName,"FAST FORWARD")==0){ if(!checkCollision(posX+1,posY)) posX++; }
+  else if (strcmp(buttonName, "VOL-") == 0 && gameActive && !gameOver)
+  {
+    if (fallSpeed < 2000)
+      fallSpeed += 100;
+    Serial.print("Speed decreased, fall interval: ");
+    Serial.println(fallSpeed);
+  }
+  else if (gameActive && !gameOver && !gamePaused)
+  {
+    if (strcmp(buttonName, "FAST BACK") == 0)
+    {
+      if (!checkCollision(posX - 1, posY))
+        posX--;
+    }
+    else if (strcmp(buttonName, "FAST FORWARD") == 0)
+    {
+      if (!checkCollision(posX + 1, posY))
+        posX++;
+    }
     drawMatrix();
   }
 
-  last_decodedRawData=code;
+  last_decodedRawData = code;
   delay(200);
+}
+
+void initializeLCD()
+{
+  lcd.setCursor(0, 0);
+  lcd.begin(16, 2);
+  lcd.print("Tetris IR Remote");
+  lcd.setCursor(0, 1);
+  lcd.print("POWER to start");
 }
 
 void setup()
@@ -266,6 +311,8 @@ void setup()
   lc.clearDisplay(0);
 
   randomSeed(analogRead(0));
+
+  initializeLCD();
 }
 
 void loop()
