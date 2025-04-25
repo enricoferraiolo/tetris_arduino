@@ -19,6 +19,10 @@
 #define MATRIX_DIN_PIN 12
 #define MATRIX_CLK_PIN 11
 #define MATRIX_CS_PIN 10
+// Rotary encoder pin configuration
+#define ENCODER_CLK_PIN 2
+#define ENCODER_DT_PIN 8
+#define ENCODER_SW_PIN -1     // Set to actual pin if using a button, -1 if not used
 // Game configuration
 #define MIN_FALL_SPEED 100
 #define MAX_FALL_SPEED 2000
@@ -27,6 +31,7 @@
 #define BLINK_COUNT 3         // Numero di lampeggiamenti in caso di game over
 #define BLINK_DELAY 200       // Millisecondi di ritardo tra i lampeggiamenti
 #define IR_DEBOUNCE_DELAY 200 // Millisecondi di debounce per il ricevitore IR
+#define ENCODER_DEBOUNCE 50   // Millisecondi di debounce per l'encoder (aumentato)
 
 // Configurazione LCD
 LiquidCrystal lcd(LCD_RS_PIN, LCD_E_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);
@@ -41,6 +46,12 @@ bool matrixOn = false;
 
 const IRCode *activeMap;
 size_t mapSize;
+
+// Configurazione rotary encoder
+volatile int lastEncoderState;
+volatile unsigned long lastEncoderTime = 0;
+volatile bool encoderChanged = false;
+volatile int encoderDirection = 0; // 1: clockwise, -1: counter-clockwise, 0: no change
 
 // Definizione della struttura Tetromino
 struct Tetromino
@@ -72,9 +83,10 @@ bool gameOver = false;
 bool gamePaused = false;
 int score = 0;
 
-// Prototipi
+// Prototipi di funzione
 void initializeLCD();
 void initializeActiveMap();
+void initializeEncoder();
 bool checkCollision(int newX, int newY);
 void spawnNewPiece();
 void mergePiece();
@@ -86,6 +98,8 @@ void handleGameOver();
 void updateSpeedDisplay();
 void toggleGamePause();
 void toggleGameActive();
+void handleEncoderChange();
+void encoderISR();
 
 void setup()
 {
@@ -106,6 +120,9 @@ void setup()
   // Inizializzazione del display LCD
   lcd.begin(16, 2);
   initializeLCD();
+
+  // Inizializzazione rotary encoder
+  initializeEncoder();
 }
 
 void loop()
@@ -115,6 +132,13 @@ void loop()
   {
     translateIR();
     irRecv.resume();
+  }
+
+  // Gestione dell'encoder rotativo
+  if (encoderChanged && gameActive && !gameOver && !gamePaused)
+  {
+    handleEncoderChange();
+    encoderChanged = false;
   }
 
   // Logica di caduta del pezzo
@@ -139,6 +163,66 @@ void loop()
   {
     handleGameOver();
   }
+}
+
+void initializeEncoder()
+{
+  pinMode(ENCODER_CLK_PIN, INPUT_PULLUP);
+  pinMode(ENCODER_DT_PIN, INPUT_PULLUP);
+  
+  lastEncoderState = digitalRead(ENCODER_CLK_PIN);
+  
+  // Configura interrupt solo sul fronte di SALITA del pin CLK dell'encoder
+  attachInterrupt(digitalPinToInterrupt(ENCODER_CLK_PIN), encoderISR, RISING);
+}
+
+void encoderISR()
+{
+  // Debounce
+  unsigned long currentTime = millis();
+  if (currentTime - lastEncoderTime < ENCODER_DEBOUNCE)
+  {
+    return;
+  }
+  
+  // Lettura dei pin quando CLK è HIGH (siamo sicuri che è al livello alto grazie all'interrupt RISING)
+  // Se DT è basso quando CLK è alto, rotazione oraria
+  // Se DT è alto quando CLK è alto, rotazione antioraria
+  if (digitalRead(ENCODER_DT_PIN) == LOW)
+  {
+    encoderDirection = 1;  // Clockwise (orario)
+  }
+  else
+  {
+    encoderDirection = -1; // Counter-clockwise (antiorario)
+  }
+  
+  encoderChanged = true;
+  lastEncoderTime = currentTime;
+}
+
+void handleEncoderChange()
+{
+  if (encoderDirection == 1)
+  {
+    // Rotazione in senso orario - aumenta velocità
+    if (fallSpeed > MIN_FALL_SPEED)
+    {
+      fallSpeed -= SPEED_INCREMENT;
+      updateSpeedDisplay();
+    }
+  }
+  else if (encoderDirection == -1)
+  {
+    // Rotazione in senso antiorario - diminuisce velocità
+    if (fallSpeed < MAX_FALL_SPEED)
+    {
+      fallSpeed += SPEED_INCREMENT;
+      updateSpeedDisplay();
+    }
+  }
+  
+  encoderDirection = 0;
 }
 
 void initializeLCD()
