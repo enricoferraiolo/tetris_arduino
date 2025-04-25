@@ -3,6 +3,7 @@
 #include <LedControl.h>
 
 #define PRODUCTION false
+#define MAX7219_MAX_DEVICES 1
 
 // IR receiver on digital pin 3
 const int receiverPin = 3;
@@ -94,7 +95,7 @@ void setup()
   irrecv.enableIRIn();
 
   // Initialize each MAX7219 in the chain
-  for (int dev = 0; dev < 4; ++dev)
+  for (int dev = 0; dev < MAX7219_MAX_DEVICES; ++dev)
   {
     lc.shutdown(dev, false); // Wake up
     lc.setIntensity(dev, 8); // Mid brightness (0–15)
@@ -104,8 +105,8 @@ void setup()
 
 void toggleMatrix(bool on)
 {
-  // For each of the 4 devices:
-  for (int dev = 0; dev < 4; ++dev)
+  // For each of the devices:
+  for (int dev = 0; dev < MAX7219_MAX_DEVICES; ++dev)
   {
     if (on)
     {
