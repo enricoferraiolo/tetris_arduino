@@ -101,6 +101,17 @@ int fallSpeed = 1000;
 bool gameActive = false;
 bool gameOver = false;
 bool gamePaused = false;
+int score = 0;
+
+void initializeLCD()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.begin(16, 2);
+  lcd.print("Tetris IR Remote");
+  lcd.setCursor(0, 1);
+  lcd.print("POWER to start");
+}
 
 void initializeActiveMap()
 {
@@ -167,8 +178,16 @@ void clearLines()
 {
   for (int y = 0; y < 8; y++)
   {
-    if (grid[y] == 0b11111111)
+    if (grid[y] == 0xFF)
     {
+      // linea completa
+      score += 10; // incrementa punteggio
+      // aggiorna LCD
+      lcd.setCursor(0, 1);
+      lcd.print("Score: ");
+      lcd.print(score);
+      lcd.print("  ");
+      // rialza tutte le righe sopra
       for (int yy = y; yy > 0; yy--)
         grid[yy] = grid[yy - 1];
       grid[0] = 0;
@@ -207,6 +226,14 @@ void resetGame()
   memset(grid, 0, sizeof(grid));
   gameOver = false;
   gamePaused = false; // reset pausa
+  score = 0;          // reset punteggio
+  // mostra punteggio iniziale
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Speed: ");
+  lcd.print(fallSpeed);
+  lcd.setCursor(0, 1);
+  lcd.print("Score: 0      ");
   spawnNewPiece();
 }
 
@@ -240,6 +267,7 @@ void translateIR()
     else
     {
       lc.clearDisplay(0);
+      initializeLCD();
     }
   }
   else if (strcmp(buttonName, "PAUSE") == 0)
@@ -256,6 +284,26 @@ void translateIR()
     {
       gamePaused = !gamePaused;
       Serial.println(gamePaused ? "Game Paused" : "Game Resumed");
+      if (gamePaused)
+      {
+        lcd.setCursor(0, 0);
+        lcd.print("Game Paused     ");
+        lcd.setCursor(0, 1);
+        lcd.print("Score: ");
+        lcd.print(score);
+        lc.clearDisplay(0);
+      }
+      else
+      {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Speed: ");
+        lcd.print(fallSpeed);
+        lcd.setCursor(0, 1);
+        lcd.print("Score: ");
+        lcd.print(score); // mostra punteggio
+        drawMatrix();
+      }
     }
   }
   else if (strcmp(buttonName, "VOL+") == 0 && gameActive && !gameOver)
@@ -264,6 +312,13 @@ void translateIR()
       fallSpeed -= 100;
     Serial.print("Speed increased, fall interval: ");
     Serial.println(fallSpeed);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Speed: ");
+    lcd.print(fallSpeed);
+    lcd.setCursor(0, 1);
+    lcd.print("Score: ");
+    lcd.print(score); 
   }
   else if (strcmp(buttonName, "VOL-") == 0 && gameActive && !gameOver)
   {
@@ -271,6 +326,13 @@ void translateIR()
       fallSpeed += 100;
     Serial.print("Speed decreased, fall interval: ");
     Serial.println(fallSpeed);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Speed: ");
+    lcd.print(fallSpeed);
+    lcd.setCursor(0, 1);
+    lcd.print("Score: ");
+    lcd.print(score); 
   }
   else if (gameActive && !gameOver && !gamePaused)
   {
@@ -289,15 +351,6 @@ void translateIR()
 
   last_decodedRawData = code;
   delay(200);
-}
-
-void initializeLCD()
-{
-  lcd.setCursor(0, 0);
-  lcd.begin(16, 2);
-  lcd.print("Tetris IR Remote");
-  lcd.setCursor(0, 1);
-  lcd.print("POWER to start");
 }
 
 void setup()
@@ -342,6 +395,12 @@ void loop()
   if (gameOver)
   {
     Serial.println("Game Over! Press PAUSE to restart.");
+    lcd.setCursor(0, 0);
+    lcd.print("Final score: ");
+    lcd.print(score);
+    lcd.setCursor(0, 1);
+    lcd.print("PAUSE to restart");
+
     for (int i = 0; i < 3; i++)
     {
       lc.clearDisplay(0);
