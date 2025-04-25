@@ -93,7 +93,7 @@ byte grid[8] = {0};
 Tetromino currentPiece;
 int posX, posY;
 unsigned long lastFall = 0;
-const int fallSpeed = 1000;
+int fallSpeed = 1000;
 bool gameActive = false;
 bool gameOver = false;
 bool gamePaused = false;
@@ -236,6 +236,14 @@ void translateIR(){
       gamePaused=!gamePaused;
       Serial.println(gamePaused?"Game Paused":"Game Resumed");
     }
+  }
+  else if(strcmp(buttonName,"VOL+")==0 && gameActive && !gameOver){
+    if(fallSpeed > 100) fallSpeed -= 100;
+    Serial.print("Speed increased, fall interval: "); Serial.println(fallSpeed);
+  }
+  else if(strcmp(buttonName,"VOL-")==0 && gameActive && !gameOver){
+    if(fallSpeed < 2000) fallSpeed += 100;
+    Serial.print("Speed decreased, fall interval: "); Serial.println(fallSpeed);
   }
   else if(gameActive && !gameOver && !gamePaused){
     if(strcmp(buttonName,"FAST BACK")==0){ if(!checkCollision(posX-1,posY)) posX--; }

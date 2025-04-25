@@ -19,3 +19,12 @@ elf = '.pio\build\uno\firmware.elf'
 ```
 
 In order to use the Wokwi extension type f1 then type `Wokwi: Start Simulator`. This will open a new window with the Wokwi simulator.
+
+## How To Play
+After injecting the code into the board, you can play the game by using your IR remote's buttons:
+- `POWER`: toggle the game on/off
+- `FAST BACK`: move the piece to the left
+- `FAST FORWARD`: move the piece to the right
+- `PAUSE`: toggle the game pause on/off 
+- `VOl+`: increase the speed of the game
+- `VOL-`: decrease the speed of the game
