@@ -18,34 +18,38 @@
 - Install Wokwi extension in VSCode
 
 ## Components connections
-- LCD:
-  -  RS: Pin 13
-  -  E: Pin 9
-  -  D4: Pin 6
-  -  D5: Pin 5
-  -  D6: Pin 7
-  -  D7: Pin 4
-  -  VSS: GND
-  -  VDD: 5V
-  -  RW: GND
-  -  A: 5V (through a 220 Ohm resistor)
-  -  K: GND
--  IR Receiver:
-  -  VCC: 5V
-  -  GND: GND
-  -  OUT: Pin 3
--  Rotary Encoder:
-  -  CLK: Pin 2
-  -  DT: Pin 8
-  -  SW: Not used
-  -  VCC: 5V
-  -  GND: GND
--  8x8 LED Matrix Display (MAX7219):
-  -  VCC: 5V
-  -  GND: GND
-  -  DIN: Pin 12
-  -  CS: Pin 10
-  -  CLK: Pin 11
+### LCD (16x2)
+- **RS**: Pin 13  
+- **E**: Pin 9  
+- **D4**: Pin 6  
+- **D5**: Pin 5  
+- **D6**: Pin 7  
+- **D7**: Pin 4  
+- **VSS**: GND  
+- **VDD**: 5V  
+- **RW**: GND  
+- **A (Anodo retroilluminazione)**: 5V *(tramite una resistenza da 220Ω)*  
+- **K (Catodo retroilluminazione)**: GND  
+
+### Ricevitore IR
+- **VCC**: 5V  
+- **GND**: GND  
+- **OUT**: Pin 3  
+
+### Encoder Rotativo
+- **CLK**: Pin 2  
+- **DT**: Pin 8  
+- **SW**: *Non utilizzato*  
+- **VCC**: 5V  
+- **GND**: GND  
+
+### Display LED 8x8 (con MAX7219)
+- **VCC**: 5V  
+- **GND**: GND  
+- **DIN**: Pin 12  
+- **CS**: Pin 10  
+- **CLK**: Pin 11  
+
 
 ## Installation
 Clone the repository to your local machine. Then open the project in your IDE and inject the code into your Arduino board.
