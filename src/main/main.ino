@@ -5,7 +5,7 @@
 #include "ir_utils.h"
 
 // Constants and configuration
-#define PRODUCTION false
+#define PRODUCTION true
 #define MAX7219_MAX_DEVICES 1 // Max devices for the LED matrix
 #define RECEIVER_PIN 3        // Pin for IR receiver
 // LCD pin configuration
