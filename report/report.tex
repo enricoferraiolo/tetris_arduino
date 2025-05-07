@@ -7,13 +7,15 @@
 \usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
 % Useful packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
 \usepackage{graphicx}
-\usepackage[colorlinks=true, allcolors=blue]{hyperref}
 \usepackage{listings}
-\usepackage{float}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{caption}
 \usepackage{subcaption}
-\usepackage{booktabs}
-\usepackage{xparse}
 
 \hypersetup{
 pdftitle={Progetto Tetris Arduino},
@@ -42,8 +44,55 @@ pdfauthor={Enrico Ferraiolo}
 \newpage
 
 \section{Introduzione}
-
-
+Il gioco Tetris è uno dei puzzle game più celebri di sempre: l'utente deve ruotare e spostare pezzi geometrici ("tetramini") che cadono, 
+completando linee orizzontali per ottenere punti.\\
+L'obiettivo di questo progetto è realizzare una versione giocabile su Arduino di Tetris, utilizzando un display a matrice LED 8x8 (MAX7219) 
+per il campo di gioco, un display LCD 16x2 per visualizzare punteggio e stato, mentre i controlli sono gestiti tramite telecomando IR e encoder rotativo.\\
 \newpage
+
+\section{Componenti Hardware}
+\subsection{Microcontrollore}
+Il microcontrollore utilizzato è il \textbf{Elegoo UNO R3}, esso è un'alternativa compatibile all'Arduino UNO.
+
+\subsection{Display a matrice LED - Campo di Gioco}
+Il display a matrice LED è un modulo \textbf{MAX7219}, nel caso specifico del progetto in questione è stato utilizzato un modulo 8x8.
+Ogni LED della matrice può essere acceso o spento in modo indipendente, permettendo di visualizzare il campo di gioco e i tetramini.\\
+Ogni LED rappresenta una cella del campo di gioco.
+
+\subsection{Display LCD - Informazioni di Gioco}
+Il display LCD è un modulo 16x2, esso è utilizzato per visualizzare il punteggio e lo stato del gioco.\\
+È stato utilizzato il modulo \textbf{LCD 1602}.
+A schermo vengono visualizzati:
+\begin{itemize}
+    \item \textbf{Punteggio}: il punteggio attuale del giocatore
+    \item \textbf{Stato}: lo stato del gioco (in corso, in pausa, finito)
+    \item \textbf{Velocità}: la velocità attuale del gioco
+    \item \textbf{Istruzioni ausiliarie}: istruzioni per il giocatore
+\end{itemize}
+
+\subsection{Controlli}
+Il progetto prevede l'utilizzo di un telecomando IR e di un encoder rotativo per il controllo del gioco.\\
+
+\subsubsection{Controlli Infrarossi}
+Il telecomando IR è un dispositivo che consente di inviare segnali preimpostati a distanza tramite infrarossi.\\
+Sono stati utilizzati un telecomando IR e un ricevitore IR compatibili.\\
+Il telecomando IR è dotato di diversi tasti, ognuno dei quali invia un codice univoco quando premuto.\\
+I tasti utilizzati nel progetto sono:
+\begin{itemize}
+    \item \textbf{POWER}: per accendere e spegnere il gioco
+    \item \textbf{FAST BACK}: per muovere il tetramino a sinistra
+    \item \textbf{FAST FORWARD}: per muovere il tetramino a destra
+    \item \textbf{PAUSE}: per mettere in pausa il gioco
+    \item \textbf{VOL+}: per aumentare la velocità del gioco
+    \item \textbf{VOL-}: per diminuire la velocità del gioco
+\end{itemize}
+\subsubsection{Encoder Rotativo}
+L'encoder rotativo è utilizzato per il controllo della direzione e della velocità del gioco.\\
+\begin{itemize}
+    \item \textbf{Rotazione in senso orario}: aumenta la velocità del gioco
+    \item \textbf{Rotazione in senso antiorario}: diminuisce la velocità del gioco
+\end{itemize}
+
+
 
 \end{document}
