@@ -63,6 +63,7 @@ struct Tetromino
 
 // Definizione delle forme dei tetromini
 const Tetromino TETROMINO_SHAPES[7] = {
+    //ogni bit a 1 rappresenta un LED accesso sulla riga x
     {{0b1111, 0, 0, 0}, 4, 1}, // I
     {{0b0111, 0b0100}, 3, 2},  // J
     {{0b1110, 0b0010}, 3, 2},  // L
