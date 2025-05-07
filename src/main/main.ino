@@ -1,8 +1,8 @@
+#include "lib/utils/utils.h"
 #include <Arduino.h>
 #include <IRremote.h>
 #include <LedControl.h>
 #include <LiquidCrystal.h>
-#include "utils.h"
 
 // Constants and configuration
 #define PRODUCTION true
