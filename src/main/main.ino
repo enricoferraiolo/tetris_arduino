@@ -2,7 +2,7 @@
 #include <IRremote.h>
 #include <LedControl.h>
 #include <LiquidCrystal.h>
-#include "ir_utils.h"
+#include "utils.h"
 
 // Constants and configuration
 #define PRODUCTION true

@@ -1,8 +1,8 @@
+#include <utils.h>
 #include <Arduino.h>
 #include <IRremote.h>
 #include <LedControl.h>
 #include <LiquidCrystal.h>
-#include <ir_utils.h>
 
 // Constants and configuration
 #define PRODUCTION false
