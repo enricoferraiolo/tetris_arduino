@@ -16,7 +16,13 @@
 \usepackage{hyperref}
 \usepackage{caption}
 \usepackage{subcaption}
-
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+\newcommand{\RedBlock}{\colorbox{red}{\rule{1.2ex}{1.2ex}}}      % blocco pieno rosso
+\newcommand{\WhiteBlock}{\fcolorbox{black}{white}{\rule{1.2ex}{1.2ex}}} % blocco vuoto
 \hypersetup{
 pdftitle={Progetto Tetris Arduino},
 pdfauthor={Enrico Ferraiolo}
@@ -48,6 +54,7 @@ Il gioco Tetris è uno dei puzzle game più celebri di sempre: l'utente deve ruo
 completando linee orizzontali per ottenere punti.\\
 L'obiettivo di questo progetto è realizzare una versione giocabile su Arduino di Tetris, utilizzando un display a matrice LED 8x8 (MAX7219) 
 per il campo di gioco, un display LCD 16x2 per visualizzare punteggio e stato, mentre i controlli sono gestiti tramite telecomando IR e encoder rotativo.\\
+Lo scopo del progetto è quello di realizzare una versione del gioco Tetris su Arduino totalmente funzionante con diversi moduli di input e output.\\
 \newpage
 
 \section{Componenti Hardware}
@@ -93,6 +100,56 @@ L'encoder rotativo è utilizzato per il controllo della direzione e della veloci
     \item \textbf{Rotazione in senso antiorario}: diminuisce la velocità del gioco
 \end{itemize}
 
+\section{Il Gioco}
+Il gioco Tetris è un puzzle game in cui il giocatore deve ruotare e spostare tetramini che cadono dall'alto, quest'ultimi sono composti da 
+4 celle e possono essere ruotati e spostati a sinistra o a destra nel campo di gioco.\\
+Il giocatore deve completare linee orizzontali per ottenere punti e quando una linea è completata, essa scompare e il punteggio aumenta.\\
+Il gioco termina quando i tetramini raggiungono la parte superiore del campo di gioco e non c'è quindi più spazio per far cadere nuovi tetramini.\\
+
+\subsection{Tetramini}
+Tra i tetramini presenti nel gioco implementato in questo progetto troviamo le seguenti forme:
+\begin{table}[ht]
+    \centering
+    \caption{Rappresentazione dei tetramini}
+    \begin{tabular}{  
+      >{\bfseries}l   % Nome
+      c               % Codici binari
+      c               % Dimensioni
+      l               % Rappresentazione
+    }
+      \toprule
+      Pezzo & Codici binari & W\(\times\)H & Forma \\
+      \midrule
+      I   & \makecell{\texttt{0b1111}\\\texttt{0b0000}\\\texttt{0b0000}\\\texttt{0b0000}} 
+          & 4\(\times\)1 
+          & \makecell{\RedBlock\RedBlock\RedBlock\RedBlock} \\
+      \addlinespace
+      J   & \makecell{\texttt{0b0111}\\\texttt{0b0100}} 
+          & 3\(\times\)2 
+          & \makecell{\WhiteBlock\RedBlock\RedBlock\RedBlock\\\WhiteBlock\RedBlock\WhiteBlock\WhiteBlock} \\
+      \addlinespace
+      L   & \makecell{\texttt{0b1110}\\\texttt{0b0010}} 
+          & 3\(\times\)2 
+          & \makecell{\RedBlock\RedBlock\RedBlock\WhiteBlock\\\WhiteBlock\RedBlock\WhiteBlock\WhiteBlock} \\
+      \addlinespace
+      O   & \makecell{\texttt{0b0110}\\\texttt{0b0110}} 
+          & 2\(\times\)2 
+          & \makecell{\WhiteBlock\RedBlock\RedBlock\WhiteBlock\\\WhiteBlock\RedBlock\RedBlock\WhiteBlock} \\
+      \addlinespace
+      S   & \makecell{\texttt{0b0111}\\\texttt{0b0010}} 
+          & 3\(\times\)2 
+          & \makecell{\WhiteBlock\RedBlock\RedBlock\RedBlock\\\WhiteBlock\WhiteBlock\RedBlock\WhiteBlock} \\
+      \addlinespace
+      T   & \makecell{\texttt{0b1100}\\\texttt{0b0110}} 
+          & 3\(\times\)2 
+          & \makecell{\RedBlock\RedBlock\WhiteBlock\WhiteBlock\\\WhiteBlock\RedBlock\RedBlock\WhiteBlock} \\
+      \addlinespace
+      Z   & \makecell{\texttt{0b1110}\\\texttt{0b1000}} 
+          & 3\(\times\)2 
+          & \makecell{\RedBlock\RedBlock\RedBlock\WhiteBlock\\\RedBlock\WhiteBlock\WhiteBlock\WhiteBlock} \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
 
 
 \end{document}
