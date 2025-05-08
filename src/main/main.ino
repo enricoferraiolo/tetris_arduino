@@ -1,4 +1,4 @@
-#include "lib/utils/utils.h"
+#include "utils.h"
 #include <Arduino.h>
 #include <IRremote.h>
 #include <LedControl.h>
