@@ -21,6 +21,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{color}
+\usepackage{float}
 \newcommand{\RedBlock}{\colorbox{red}{\rule{1.2ex}{1.2ex}}}      % blocco pieno rosso
 \newcommand{\WhiteBlock}{\fcolorbox{black}{white}{\rule{1.2ex}{1.2ex}}} % blocco vuoto
 \hypersetup{
@@ -58,6 +59,8 @@ Lo scopo del progetto è quello di realizzare una versione del gioco Tetris su A
 \newpage
 
 \section{Componenti Hardware}
+Di seguito vengono elencati e descritti i componenti hardware utilizzati per il progetto.
+
 \subsection{Microcontrollore}
 Il microcontrollore utilizzato è il \textbf{Elegoo UNO R3}, esso è un'alternativa compatibile all'Arduino UNO.
 
@@ -107,10 +110,11 @@ Il giocatore deve completare linee orizzontali per ottenere punti e quando una l
 Il gioco termina quando i tetramini raggiungono la parte superiore del campo di gioco e non c'è quindi più spazio per far cadere nuovi tetramini.\\
 
 \subsection{Tetramini}
-Tra i tetramini presenti nel gioco implementato in questo progetto troviamo le seguenti forme:
-\begin{table}[ht]
+Tra i tetramini presenti nel gioco implementato in questo progetto troviamo le seguenti forme presenti nella tabella \ref{tab:tetramini}:
+\begin{table}[H]
     \centering
     \caption{Rappresentazione dei tetramini}
+    \label{tab:tetramini}
     \begin{tabular}{  
       >{\bfseries}l   % Nome
       c               % Codici binari
@@ -159,4 +163,95 @@ Il progetto è stato sviluppato per essere eseguito su:
 \end{itemize}
 Per cambiare ambiente di sviluppo è sufficiente cambiare la variabile \texttt{PRODUCTION} in nel file sorgente: \texttt{PRODUCTION = true} per l'hardware fisico e \texttt{PRODUCTION = false} per il simulatore.\\
 Questo serve perché i codici infrarossi inviati dal telecomando IR sono diversi a seconda dell'ambiente di sviluppo.\\
+
+\section{Setup Hardware}
+Questa sezione riporta e descrive come sono stati connessi i vari moduli hardware al microcontrollore.
+
+\subsection{Display a matrice LED (MAX7219)}
+Il modulo MAX7219 a matrice 8x8 viene utilizzato per visualizzare il campo di gioco e i tetramini.\\
+Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\begin{table}[H]
+  \centering
+  \caption{Connessioni Matrix (MAX7219) - Microcontrollore}
+  \label{tab:matrix-max7219-connections}
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Matrix Pin} & \textbf{Microcontrollore Pin} \\
+    \midrule
+    VCC  & 5V       \\
+    GND  & GND      \\
+    DIN  & Pin 12   \\
+    CS   & Pin 10   \\
+    CLK  & Pin 11   \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Display LCD 16x2}
+Il modulo LCD 1602 serve per mostrare punteggio, stato e velocità di gioco.\\
+Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\begin{table}[H]
+  \centering
+  \caption{Connessioni LCD Display (16x2) - Microcontrollore}
+  \label{tab:lcd-16x2-connections}
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{LCD Pin} & \textbf{Microcontrollore Pin} \\
+    \midrule
+    RS           & Pin 13                     \\
+    E            & Pin 9                      \\
+    D4           & Pin 6                      \\
+    D5           & Pin 5                      \\
+    D6           & Pin 7                      \\
+    D7           & Pin 4                      \\
+    VSS          & GND                        \\
+    VDD          & 5V                         \\
+    RW           & GND                        \\
+    A (Anodo)    & 5V (attraverso un resistore da 220 \(\Omega\)) \\
+    K (Catodo)  & GND                        \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Ricevitore Infrarossi (IR)}
+Il modulo ricevitore IR decodifica i codici inviati dal telecomando per gestire i comandi di gioco.\\
+Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\begin{table}[H]
+  \centering
+  \caption{Connessioni IR Receiver Module - Microcontrollore}
+  \label{tab:ir-receiver-connections}
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{IR Pin} & \textbf{Microcontrollore Pin} \\
+    \midrule
+    VCC    & 5V    \\
+    GND    & GND   \\
+    OUT/Data & Pin 3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Encoder Rotativo}
+L'encoder rotativo serve per regolare manualmente la velocità di caduta dei tetramini.\\
+Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\begin{table}[H]
+  \centering
+  \caption{Connessioni Rotary Encoder Module - Microcontrollore}
+  \label{tab:rotary-encoder-connections}
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Encoder Pin} & \textbf{Microcontrollore Pin} \\
+    \midrule
+    CLK           & Pin 2   \\
+    DT            & Pin 8   \\
+    SW (Switch)   & Non usato \\
+    VCC           & 5V      \\
+    GND           & GND     \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+
 \end{document}
