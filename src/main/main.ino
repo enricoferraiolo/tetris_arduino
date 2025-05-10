@@ -4,26 +4,26 @@
 #include <LedControl.h>
 #include <LiquidCrystal.h>
 
-// Constants and configuration
+// Costanti
 #define PRODUCTION true
-#define MAX7219_MAX_DEVICES 1 // Max devices for the LED matrix
-#define RECEIVER_PIN 3        // Pin for IR receiver
-// LCD pin configuration
+#define MAX7219_MAX_DEVICES 1 // Numero massimo di dispositivi MAX7219
+#define RECEIVER_PIN 3        // Pin per il ricevitore IR
+// Configurazione pin LCD
 #define LCD_RS_PIN 13
 #define LCD_E_PIN 9
 #define LCD_D4_PIN 6
 #define LCD_D5_PIN 5
 #define LCD_D6_PIN 7
 #define LCD_D7_PIN 4
-// LED matrix pin configuration
+// Configurazione pin LED matrix
 #define MATRIX_DIN_PIN 12
 #define MATRIX_CLK_PIN 11
 #define MATRIX_CS_PIN 10
-// Rotary encoder pin configuration
+// Configurazione pin rotary encoder
 #define ENCODER_CLK_PIN 2
 #define ENCODER_DT_PIN 8
-#define ENCODER_SW_PIN -1     // Set to actual pin if using a button, -1 if not used
-// Game configuration
+#define ENCODER_SW_PIN -1 // Set to actual pin if using a button, -1 if not used
+// Configurazione del gioco
 #define MIN_FALL_SPEED 100
 #define MAX_FALL_SPEED 2000
 #define SPEED_INCREMENT 100
@@ -63,7 +63,7 @@ struct Tetromino
 
 // Definizione delle forme dei tetromini
 const Tetromino TETROMINO_SHAPES[7] = {
-    //ogni bit a 1 rappresenta un LED accesso sulla riga x
+    // Ogni bit a 1 rappresenta un LED accesso sulla riga x
     {{0b1111, 0, 0, 0}, 4, 1}, // I
     {{0b0111, 0b0100}, 3, 2},  // J
     {{0b1110, 0b0010}, 3, 2},  // L
@@ -73,7 +73,7 @@ const Tetromino TETROMINO_SHAPES[7] = {
     {{0b1110, 0b1000}, 3, 2}   // Z
 };
 
-// Variabili del gioco
+// Variabili di gioco
 byte grid[8] = {0};
 Tetromino currentPiece;
 int posX, posY;
@@ -84,7 +84,7 @@ bool gameOver = false;
 bool gamePaused = false;
 int score = 0;
 
-// Prototipi di funzione
+// Prototipi
 void initializeLCD();
 void initializeActiveMap();
 void initializeEncoder();
@@ -170,9 +170,9 @@ void initializeEncoder()
 {
   pinMode(ENCODER_CLK_PIN, INPUT_PULLUP);
   pinMode(ENCODER_DT_PIN, INPUT_PULLUP);
-  
+
   lastEncoderState = digitalRead(ENCODER_CLK_PIN);
-  
+
   // Configura interrupt solo sul fronte di SALITA del pin CLK dell'encoder
   attachInterrupt(digitalPinToInterrupt(ENCODER_CLK_PIN), encoderISR, RISING);
 }
@@ -185,19 +185,19 @@ void encoderISR()
   {
     return;
   }
-  
+
   // Lettura dei pin quando CLK è HIGH (siamo sicuri che è al livello alto grazie all'interrupt RISING)
   // Se DT è basso quando CLK è alto, rotazione oraria
   // Se DT è alto quando CLK è alto, rotazione antioraria
   if (digitalRead(ENCODER_DT_PIN) == LOW)
   {
-    encoderDirection = 1;  // Clockwise (orario)
+    encoderDirection = 1; // Clockwise (orario)
   }
   else
   {
     encoderDirection = -1; // Counter-clockwise (antiorario)
   }
-  
+
   encoderChanged = true;
   lastEncoderTime = currentTime;
 }
@@ -222,7 +222,7 @@ void handleEncoderChange()
       updateSpeedDisplay();
     }
   }
-  
+
   encoderDirection = 0;
 }
 
@@ -317,7 +317,7 @@ void clearLines()
       // Linea completa
       score += POINTS_PER_LINE;
 
-      // Aggiorna LCD con il punteggio
+      // Aggiorna schermo LCD con il punteggio
       lcd.setCursor(0, 1);
       lcd.print("Score: ");
       lcd.print(score);
