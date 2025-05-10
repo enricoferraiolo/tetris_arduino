@@ -67,9 +67,10 @@
 Clone the repository to your local machine. Then open the project in your IDE and inject the code into your Arduino board.
 
 ### Simulator
-In VSCode, install the PlatformIO extension and the Wokwi extension. The PlatformIO extension is used to build the project and the Wokwi extension is used to simulate the project.\\
-Using the PlatformIO extension, pick the directory of this project as the project directory. This will create a `.pio` folder in the root directory of the project. This folder contains all the files needed to build the project.   
-Type `f1` then type `PlateformIO: Build` to build the project.  
+In VSCode, install the PlatformIO extension and the Wokwi extension. The PlatformIO extension is used to build the project and the Wokwi extension is used to simulate the project.   
+Using the PlatformIO extension, pick the directory of this project as the project directory.
+Type `f1` then type `PlatformIO: Build` to build the project.
+This will create a `.pio` folder in the root directory of the project. This folder contains all the files needed to build the project.
 - `diagram.json` file is used to simulate the project in Wokwi. This file contains the schematic of the project.
 - `wokwi.toml` file is used to configure the Wokwi simulator. This file contains the configuration of the project.
 
@@ -89,7 +90,7 @@ In order to use the Wokwi extension type `f1` then type `Wokwi: Start Simulator`
 > Otherwise, if you are testing the code in the Arduino board you have to set the `PRODUCTION` variable to `true` in the `main.cpp` file.  
 This is because the simulator IR remote control has different codes than the real IR remote control.  
 
->You are welcome to change the IR remote control codes in the `lib/ir_utils/ir_utils.h` file to fit in your IR remote control.  
+>You are welcome to change the IR remote control codes in the `lib/utils/utils.h` file to fit in your IR remote control.  
 After injecting the code into the board, you can play the game using the following controls:
 #### 🎮 IR Remote Controls:
 - `POWER`: Toggle the game on/off
@@ -115,5 +116,3 @@ After injecting the code into the board, you can play the game using the followi
 - Scoring system based on the number of lines cleared
   - Each line cleared gives 10 points
 - Visual feedback for game state
-  
-[text](https://deepwiki.com/enricoferraiolo/tetris_arduino)
