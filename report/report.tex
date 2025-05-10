@@ -31,6 +31,10 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
+% Supporto per tabelle e figure
+\usepackage{forest}
+
+
 %%% CONFIGURAZIONI %%%
 % Configurazione hyperref
 \hypersetup{
@@ -267,19 +271,19 @@ Collegamenti tra il modulo LCD 1602 e il microcontrollore:
     \label{tab:lcd-16x2-connections}
     \begin{tabular}{ll}
         \toprule
-        \textbf{LCD Pin} & \textbf{Microcontrollore Pin}      \\
+        \textbf{LCD Pin} & \textbf{Microcontrollore Pin}                \\
         \midrule
-        RS               & Pin 13                             \\
-        E                & Pin 9                              \\
-        D4               & Pin 6                              \\
-        D5               & Pin 5                              \\
-        D6               & Pin 7                              \\
-        D7               & Pin 4                              \\
-        VSS              & GND                                \\
-        VDD              & 5V                                 \\
-        RW               & GND                                \\
+        RS               & Pin 13                                       \\
+        E                & Pin 9                                        \\
+        D4               & Pin 6                                        \\
+        D5               & Pin 5                                        \\
+        D6               & Pin 7                                        \\
+        D7               & Pin 4                                        \\
+        VSS              & GND                                          \\
+        VDD              & 5V                                           \\
+        RW               & GND                                          \\
         A (Anodo)        & 5V (attraverso resistenza da 220 \(\Omega\)) \\
-        K (Catodo)       & GND                                \\
+        K (Catodo)       & GND                                          \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -323,6 +327,114 @@ Collegamenti tra l'encoder rotativo e il microcontrollore:
         \bottomrule
     \end{tabular}
 \end{table}
+
+\section{Build del Progetto}
+\label{sec:build}
+Il progetto può essere eseguito in due modalità: \textbf{simulatore} e \textbf{hardware fisico reale}.\\
+Per eseguire il progetto in modalità simulatore il file da eseguire sarà \texttt{src/main.cpp}, mentre per eseguire il progetto su hardware
+reale il file da eseguire sarà \texttt{src/main/main.ino}.\\
+Questo perché l'IDE di Arduino vuole che il file da iniettare sulla scheda sia contenuto in una cartella con lo stesso nome del file.\\
+I file sono identici se non per la riga di codice che definisce se il progetto è in produzione o meno.
+\begin{itemize}
+    \item \textbf{Simulatore:} \texttt{PRODUCTION = false}
+    \item \textbf{Hardware reale:} \texttt{PRODUCTION = true}
+\end{itemize}
+
+La differenziazione data da questa riga di codice è necessaria per gestire i codici infrarossi generati dal telecomando nei due ambienti.\\
+Infatti, per il simulatore Wokwi, i codici infrarossi sono diversi rispetto a quelli inviati dal telecomando reale.\\
+Se si volesse cambiare il telecomando, basterebbe rimappare i codici di production (\texttt{PRODUCTION\_CODES}) nel file \texttt{lib/utils/utils.h}.
+
+\subsection{Struttura del Progetto}
+\label{subsec:progetto-struttura}
+Il progetto è organizzato seguendo una struttura modulare che facilita lo sviluppo e la manutenzione del codice. \\
+Di seguito è riportata la struttura delle directory e dei file principali:\\
+\begin{forest}
+    for tree={
+    font=\ttfamily,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    edge path={
+            \noexpand\path [draw, \forestoption{edge}]
+            (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+        },
+    before typesetting nodes={
+            if n=1
+                {insert before={[,phantom]}}
+                {}
+        },
+    fit=band,
+    before computing xy={l=15pt},
+    }
+    [TETRIS\_ARDUINO
+    [include [{\color{gray}(PlatformIO directory)}], font=\footnotesize\itshape\color{gray}]
+    [lib
+            [utils
+                    [utils.h [{\color{gray}(Libreria utility)}], font=\footnotesize\itshape\color{gray}]
+            ]
+    ]
+    [report [{\color{gray}(Report directory)}, font=\footnotesize\itshape\color{gray}]
+            [report.tex [{\color{gray}(Report in Latex)}, font=\footnotesize\itshape\color{gray}]]
+            [report.pdf [{\color{gray}(Report prodotto)}, font=\footnotesize\itshape\color{gray}]]
+    ]
+    [src
+            [{\color{gray}(Source code directory)}, font=\footnotesize\itshape\color{gray}]
+            [main
+                    [{\color{gray}(Report directory)}, font=\footnotesize\itshape\color{gray}]
+                    [main.ino [{\color{gray}(Arduino IDE entry point)}, font=\footnotesize\itshape\color{gray}]]
+            ]
+            [main.cpp [{\color{gray}(PlatformIO entry point)}], font=\footnotesize\itshape\color{gray}]
+    ]
+    [test [{\color{gray}(PlatformIO directory)}], font=\footnotesize\itshape\color{gray}]
+    [diagram.json [{\color{gray}(File di configurazione Wokwi - circuiteria)}, font=\footnotesize\itshape\color{gray}]]
+    [platformio.ini [{\color{gray}(File di configurazione PlatformIO)}, font=\footnotesize\itshape\color{gray}]]
+    [README.md [{\color{gray}(Documentazione)}, font=\footnotesize\itshape\color{gray}]]
+    [wokwi.toml [{\color{gray}(File di configurazione Wokwi - simulatore)}, font=\footnotesize\itshape\color{gray}]]
+    ]
+\end{forest}
+\subsection{Simulatore}
+Di seguito sono riportati i passaggi per eseguire il progetto in modalità simulatore.
+\begin{enumerate}
+    \item Aprire VSCode
+    \item Installare l'estensione \href{https://marketplace.visualstudio.com/items?itemName=Wokwi.wokwi-vscode}{Wokwi}
+    \item Installare l'estensione \href{https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide}{PlatformIO}
+    \item Aprire la cartella \texttt{tetris-arduino} come progetto PlatformIO all'interno di VSCode
+    \item In \texttt{src/main.cpp}, verificare che sia presente:
+          \begin{lstlisting}
+#define PRODUCTION  false
+    \end{lstlisting}
+    \item Dal \textbf{Command Palette} (\texttt{F1}) eseguire \texttt{PlatformIO: Build}.
+          Questo genera i file di firmware in \texttt{.pio/build/uno/}.
+    \item Controllare il file \texttt{wokwi.toml}, deve essere del tipo:
+          \begin{verbatim}
+[wokwi]
+version = 1
+firmware = "percorso del file firmware.hex"
+elf      = "percorso del file firmware.elf"
+\end{verbatim}
+    \item Avviare il simulatore con \texttt{Wokwi: Start Simulator} dal \textbf{Command Palette}.
+    \item Wokwi caricherà automaticamente lo schema in \texttt{diagram.json} insieme al firmware appena compilato.
+\end{enumerate}
+
+\subsection{Hardware Reale}
+\begin{enumerate}
+    \item In \texttt{src/main.cpp}, impostare:
+          \begin{lstlisting}
+#define PRODUCTION  true
+    \end{lstlisting}
+    \item Collegare la scheda Elegoo UNO R3 via USB al PC.
+    \item Dal \textbf{Command Palette}, selezionare \texttt{PlatformIO: Upload}.
+          PlatformIO compilerà e caricherà il firmware direttamente sulla board.
+    \item Verificare che il programma parta correttamente: il display a matrice e il LCD mostreranno lo stato del gioco.
+\end{enumerate}
+
+\subsection{Note su Wokwi \& PlatformIO}
+Per lavorare in entrambe le modalità è sufficiente mantenere la cartella aperta come progetto PlatformIO: VS Code riconosce automaticamente il file \texttt{platformio.ini} e propone le azioni di build/upload nella barra inferiore.
+La netlist del circuito per Wokwi è definita in \texttt{diagram.json} e non richiede ulteriori modifiche.
+Per modificare i codici infrarossi utilizzati dal telecomando in ambiente simulato o reale, fare riferimento a \texttt{lib/ir\_utils/ir\_utils.h}.
+
 
 
 \end{document}
