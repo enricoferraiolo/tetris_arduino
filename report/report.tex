@@ -117,11 +117,11 @@ Il display a matrice LED è un modulo \textbf{MAX7219} con configurazione 8x8. O
     \item mostrare le celle occupate
 \end{itemize}
 
-Ogni LED rappresenta una singola cella del campo di gioco Tetris.
+Ogni LED rappresenta una singola cella del campo di gioco.
 
 \subsection{Display LCD - Informazioni di Gioco}
 \label{subsec:display-lcd}
-Per visualizzare informazioni testuali viene utilizzato un display LCD 16x2 (\textbf{LCD 1602}). Sul display vengono mostrati:
+Per visualizzare informazioni testuali viene utilizzato un display LCD 16x2 (\textbf{LCD 1602}). A schermo vengono mostrati:
 \begin{itemize}
     \item \textbf{Punteggio}: punteggio attuale del giocatore
     \item \textbf{Stato}: stato corrente del gioco (in corso, pausa, terminato)
@@ -165,9 +165,9 @@ L'encoder rotativo offre un controllo analogico della velocità di gioco:
 
 \section{Il Gioco}
 \label{sec:gioco}
-Tetris è un puzzle game in cui il giocatore deve manipolare tetramini (forme composte da 4 blocchi) che cadono dall'alto nel campo di gioco. L'obiettivo è:
+Tetris è un puzzle game in cui il giocatore deve manipolare dei tetramini che cadono dall'alto nel campo di gioco. L'obiettivo è:
 \begin{itemize}
-    \item Ruotare e posizionare i tetramini per completare righe orizzontali
+    \item Ruotare e posizionare i tetramini per completare le righe orizzontali
     \item Quando una riga è completa, essa scompare e il giocatore guadagna punti
     \item Il gioco termina quando i tetramini impilati raggiungono la parte superiore del campo
 \end{itemize}
@@ -224,7 +224,7 @@ I tetramini implementati nel gioco sono rappresentati nella Tabella \ref{tab:tet
 \label{sec:ambienti}
 Il progetto è stato sviluppato per essere eseguibile in due configurazioni:
 \begin{itemize}
-    \item \textbf{Hardware fisico}: con la scheda Elegoo UNO R3 e tutti i componenti connessi
+    \item \textbf{Hardware fisico}: con la scheda Elegoo UNO R3 (o equivalente) e tutti i moduli connessi
     \item \textbf{Simulatore}: per test e sviluppo senza hardware fisico
 \end{itemize}
 
