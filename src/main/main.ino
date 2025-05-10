@@ -457,7 +457,7 @@ void translateIR()
       // Sposta a destra
       if (!checkCollision(posX + 1, posY))
       {
-        Serial.println("SPOSTO A DEStRA");
+        Serial.println("SPOSTO A DESTRA");
         posX++;
       }
       drawMatrix();
