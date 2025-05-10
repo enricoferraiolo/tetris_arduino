@@ -424,16 +424,16 @@ firmware = "percorso del file firmware.hex"
 elf      = "percorso del file firmware.elf"
 	      \end{verbatim}
     \item Avviare il simulatore con il comando \texttt{Wokwi: Start Simulator} dal \textbf{Command Palette} di VSCode.
-    \item Wokwi caricherà automaticamente lo schema in \texttt{diagram.json} insieme al firmware appena compilato e una nuova finestra interattiva del simulatore verrà aperta.
+    \item Wokwi caricherà automaticamente lo schema contenuto in \texttt{diagram.json} insieme al firmware appena compilato e una nuova finestra interattiva del simulatore verrà aperta.
 \end{enumerate}
 
 \subsection{Hardware Reale}
 \begin{enumerate}
-    \item In \texttt{src/main.cpp}, impostare:
+    \item In \texttt{src/main/main.ino}, assicurarsi che sia presente:
           \begin{lstlisting}
 #define PRODUCTION  true
 	      \end{lstlisting}
-    \item Collegare la scheda al PC
+    \item Collegare il microcontrollore al PC
     \item Aprire Arduino IDE
     \item Selezionare la scheda \texttt{Arduino UNO} e la porta COM corretta
     \item Iniettare il codice sulla scheda
