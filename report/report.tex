@@ -1,40 +1,73 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+%%% PREAMBOLO %%%
 \documentclass[a4paper, 12pt]{article}
 
-% Language setting
-\usepackage[italian]{babel}
-
-% Set page size and margins
+%%% PACCHETTI %%%
+% Layout di pagina
 \usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
-% Useful packages
+% Supporto linguistico
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[italian]{babel}
+
+% Pacchetti per elementi grafici e formattazione
 \usepackage{graphicx}
-\usepackage{listings}
 \usepackage{xcolor}
+\usepackage{float}
+
+% Tabelle avanzate
+\usepackage{booktabs}
+\usepackage{makecell}
+
+% Matematica
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Programmazione
+\usepackage{listings}
+
+% Supporto per link e PDF
 \usepackage{hyperref}
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage{booktabs}
-\usepackage{makecell}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{color}
-\usepackage{float}
-\newcommand{\RedBlock}{\colorbox{red}{\rule{1.2ex}{1.2ex}}}      % blocco pieno rosso
-\newcommand{\WhiteBlock}{\fcolorbox{black}{white}{\rule{1.2ex}{1.2ex}}} % blocco vuoto
+
+%%% CONFIGURAZIONI %%%
+% Configurazione hyperref
 \hypersetup{
-pdftitle={Progetto Tetris Arduino},
-pdfauthor={Enrico Ferraiolo}
+    pdftitle={Progetto Tetris Arduino},
+    pdfauthor={Enrico Ferraiolo},
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=green,
+    urlcolor=cyan
 }
 
+% Definizione comandi personalizzati
+\newcommand{\RedBlock}{\colorbox{red}{\rule{1.2ex}{1.2ex}}}      % blocco pieno rosso
+\newcommand{\WhiteBlock}{\fcolorbox{black}{white}{\rule{1.2ex}{1.2ex}}} % blocco vuoto
+
+% Impostazione della configurazione listings per il codice
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    breaklines=true,
+    showstringspaces=false
+}
+
+%%% INFORMAZIONI SUL DOCUMENTO %%%
 \title{\textbf{RELAZIONE: \\ Tetris Arduino}}
 \author{Enrico Ferraiolo 0001191698}
 \date{}
 
+%%% INIZIO DOCUMENTO %%%
 \begin{document}
 
+% Frontespizio
 \maketitle
 
 \begin{center}
@@ -47,70 +80,101 @@ pdfauthor={Enrico Ferraiolo}
 
 \newpage
 
+% Indice dei contenuti
 \tableofcontents
 \newpage
 
+%%% CONTENUTO PRINCIPALE %%%
 \section{Introduzione}
-Il gioco Tetris è uno dei puzzle game più celebri di sempre: l'utente deve ruotare e spostare pezzi geometrici ("tetramini") che cadono,
-completando linee orizzontali per ottenere punti.\\
-L'obiettivo di questo progetto è realizzare una versione giocabile su Arduino di Tetris, utilizzando un display a matrice LED 8x8 (MAX7219)
-per il campo di gioco, un display LCD 16x2 per visualizzare punteggio e stato, mentre i controlli sono gestiti tramite telecomando IR e encoder rotativo.\\
-Lo scopo del progetto è quello di realizzare una versione del gioco Tetris su Arduino totalmente funzionante con diversi moduli di input e output.\\
-\newpage
+\label{sec:introduzione}
+Il gioco Tetris è uno dei puzzle game più celebri di sempre: l'utente deve ruotare e spostare pezzi geometrici (``tetramini'') che cadono,
+completando linee orizzontali per ottenere punti.
+
+L'obiettivo di questo progetto è realizzare una versione giocabile su Arduino di Tetris, utilizzando:
+\begin{itemize}
+    \item un display a matrice LED 8x8 (MAX7219) per il campo di gioco
+    \item un display LCD 16x2 per visualizzare punteggio e stato
+    \item un telecomando IR e un encoder rotativo per i controlli
+\end{itemize}
+
+Lo scopo del progetto è quindi implementare una versione completamente funzionante del gioco Tetris su Arduino con diversi moduli di input e output.
 
 \section{Componenti Hardware}
+\label{sec:componenti-hardware}
 Di seguito vengono elencati e descritti i componenti hardware utilizzati per il progetto.
 
 \subsection{Microcontrollore}
-Il microcontrollore utilizzato è il \textbf{Elegoo UNO R3}, esso è un'alternativa compatibile all'Arduino UNO.
+\label{subsec:microcontrollore}
+Il microcontrollore utilizzato è il \textbf{Elegoo UNO R3}, una scheda compatibile con Arduino UNO che fornisce tutte le funzionalità necessarie per il progetto.
 
 \subsection{Display a matrice LED - Campo di Gioco}
-Il display a matrice LED è un modulo \textbf{MAX7219}, nel caso specifico del progetto in questione è stato utilizzato un modulo 8x8.
-Ogni LED della matrice può essere acceso o spento in modo indipendente, permettendo di visualizzare il campo di gioco e i tetramini.\\
-Ogni LED rappresenta una cella del campo di gioco.
+\label{subsec:display-matrice}
+Il display a matrice LED è un modulo \textbf{MAX7219} con configurazione 8x8. Ogni LED della matrice può essere controllato individualmente, consentendo di:
+\begin{itemize}
+    \item visualizzare il campo di gioco
+    \item rappresentare i tetramini in movimento
+    \item mostrare le celle occupate
+\end{itemize}
+
+Ogni LED rappresenta una singola cella del campo di gioco Tetris.
 
 \subsection{Display LCD - Informazioni di Gioco}
-Il display LCD è un modulo 16x2, esso è utilizzato per visualizzare il punteggio e lo stato del gioco.\\
-È stato utilizzato il modulo \textbf{LCD 1602}.
-A schermo vengono visualizzati:
+\label{subsec:display-lcd}
+Per visualizzare informazioni testuali viene utilizzato un display LCD 16x2 (\textbf{LCD 1602}). Sul display vengono mostrati:
 \begin{itemize}
-    \item \textbf{Punteggio}: il punteggio attuale del giocatore
-    \item \textbf{Stato}: lo stato del gioco (in corso, in pausa, finito)
-    \item \textbf{Velocità}: la velocità attuale del gioco
-    \item \textbf{Istruzioni ausiliarie}: istruzioni per il giocatore
+    \item \textbf{Punteggio}: punteggio attuale del giocatore
+    \item \textbf{Stato}: stato corrente del gioco (in corso, pausa, terminato)
+    \item \textbf{Velocità}: velocità di caduta dei tetramini
+    \item \textbf{Istruzioni ausiliarie}: informazioni utili per il giocatore
 \end{itemize}
 
 \subsection{Controlli}
-Il progetto prevede l'utilizzo di un telecomando IR e di un encoder rotativo per il controllo del gioco.\\
+\label{subsec:controlli}
+Il progetto implementa due diversi sistemi di controllo per offrire un'interazione flessibile.
 
 \subsubsection{Controlli Infrarossi}
-Il telecomando IR è un dispositivo che consente di inviare segnali preimpostati a distanza tramite infrarossi.\\
-Sono stati utilizzati un telecomando IR e un ricevitore IR compatibili.\\
-Il telecomando IR è dotato di diversi tasti, ognuno dei quali invia un codice univoco quando premuto.\\
-I tasti utilizzati nel progetto sono:
-\begin{itemize}
-    \item \textbf{POWER}: per accendere e spegnere il gioco
-    \item \textbf{FAST BACK}: per muovere il tetramino a sinistra
-    \item \textbf{FAST FORWARD}: per muovere il tetramino a destra
-    \item \textbf{PAUSE}: per mettere in pausa il gioco
-    \item \textbf{VOL+}: per aumentare la velocità del gioco
-    \item \textbf{VOL-}: per diminuire la velocità del gioco
-\end{itemize}
+\label{subsubsec:controlli-ir}
+Il telecomando IR consente di inviare istruzioni a distanza tramite segnali infrarossi, decodificati da un apposito ricevitore. I comandi principali sono:
+
+\begin{table}[H]
+    \centering
+    \caption{Funzioni dei tasti del telecomando IR}
+    \label{tab:ir-functions}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Tasto} & \textbf{Funzione}                    \\
+        \midrule
+        POWER          & Accensione/spegnimento del gioco     \\
+        FAST BACK      & Movimento del tetramino a sinistra   \\
+        FAST FORWARD   & Movimento del tetramino a destra     \\
+        PAUSE          & Pausa/ripresa del gioco              \\
+        VOL+           & Aumento della velocità di caduta     \\
+        VOL-           & Diminuzione della velocità di caduta \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \subsubsection{Encoder Rotativo}
-L'encoder rotativo è utilizzato per il controllo della direzione e della velocità del gioco.\\
+\label{subsubsec:encoder}
+L'encoder rotativo offre un controllo analogico della velocità di gioco:
 \begin{itemize}
-    \item \textbf{Rotazione in senso orario}: aumenta la velocità del gioco
-    \item \textbf{Rotazione in senso antiorario}: diminuisce la velocità del gioco
+    \item \textbf{Rotazione in senso orario}: aumento della velocità di caduta
+    \item \textbf{Rotazione in senso antiorario}: diminuzione della velocità di caduta
 \end{itemize}
 
 \section{Il Gioco}
-Il gioco Tetris è un puzzle game in cui il giocatore deve ruotare e spostare tetramini che cadono dall'alto, quest'ultimi sono composti da
-4 celle e possono essere ruotati e spostati a sinistra o a destra nel campo di gioco.\\
-Il giocatore deve completare linee orizzontali per ottenere punti e quando una linea è completata, essa scompare e il punteggio aumenta.\\
-Il gioco termina quando i tetramini raggiungono la parte superiore del campo di gioco e non c'è quindi più spazio per far cadere nuovi tetramini.\\
+\label{sec:gioco}
+Tetris è un puzzle game in cui il giocatore deve manipolare tetramini (forme composte da 4 blocchi) che cadono dall'alto nel campo di gioco. L'obiettivo è:
+\begin{itemize}
+    \item Ruotare e posizionare i tetramini per completare righe orizzontali
+    \item Quando una riga è completa, essa scompare e il giocatore guadagna punti
+    \item Il gioco termina quando i tetramini impilati raggiungono la parte superiore del campo
+\end{itemize}
 
 \subsection{Tetramini}
-Tra i tetramini presenti nel gioco implementato in questo progetto troviamo le seguenti forme presenti nella tabella \ref{tab:tetramini}:
+\label{subsec:tetramini}
+I tetramini implementati nel gioco sono rappresentati nella Tabella \ref{tab:tetramini}:
+
 \begin{table}[H]
     \centering
     \caption{Rappresentazione dei tetramini}
@@ -156,23 +220,32 @@ Tra i tetramini presenti nel gioco implementato in questo progetto troviamo le s
 \end{table}
 
 \section{Ambienti di Sviluppo}
-Il progetto è stato sviluppato per essere eseguito su:
+\label{sec:ambienti}
+Il progetto è stato sviluppato per essere eseguibile in due configurazioni:
 \begin{itemize}
-    \item \textbf{Hardware fisico}: scheda compatibile e moduli connessi
-    \item \textbf{Simulatore}: per testare il codice senza hardware fisico su un simulatore software
+    \item \textbf{Hardware fisico}: con la scheda Elegoo UNO R3 e tutti i componenti connessi
+    \item \textbf{Simulatore}: per test e sviluppo senza hardware fisico
 \end{itemize}
-Per cambiare ambiente di sviluppo è sufficiente cambiare la variabile \texttt{PRODUCTION} in nel file sorgente: \texttt{PRODUCTION = true} per l'hardware fisico e \texttt{PRODUCTION = false} per il simulatore.\\
-Questo serve perché i codici infrarossi inviati dal telecomando IR sono diversi a seconda dell'ambiente di sviluppo.\\
+
+La configurazione dell'ambiente avviene tramite la costante \texttt{PRODUCTION} nel file sorgente principale:
+\begin{itemize}
+    \item \texttt{PRODUCTION = true}: per l'utilizzo con hardware fisico
+    \item \texttt{PRODUCTION = false}: per l'utilizzo con il simulatore
+\end{itemize}
+
+Questa differenziazione è necessaria principalmente per gestire i diversi codici infrarossi generati dal telecomando nei due ambienti.
 
 \section{Setup Hardware}
-Questa sezione riporta e descrive come sono stati connessi i vari moduli hardware al microcontrollore.
+\label{sec:setup}
+Questa sezione descrive il collegamento dei vari componenti al microcontrollore.
 
 \subsection{Display a matrice LED (MAX7219)}
-Il modulo MAX7219 a matrice 8x8 viene utilizzato per visualizzare il campo di gioco e i tetramini.\\
-Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\label{subsec:setup-max7219}
+Collegamenti tra il modulo MAX7219 e il microcontrollore:
+
 \begin{table}[H]
     \centering
-    \caption{Connessioni Matrix (MAX7219) - Microcontrollore}
+    \caption{Collegamenti Matrix (MAX7219) - Microcontrollore}
     \label{tab:matrix-max7219-connections}
     \begin{tabular}{ll}
         \toprule
@@ -188,37 +261,39 @@ Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
 \end{table}
 
 \subsection{Display LCD 16x2}
-Il modulo LCD 1602 serve per mostrare punteggio, stato e velocità di gioco.\\
-Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\label{subsec:setup-lcd}
+Collegamenti tra il modulo LCD 1602 e il microcontrollore:
+
 \begin{table}[H]
     \centering
-    \caption{Connessioni LCD Display (16x2) - Microcontrollore}
+    \caption{Collegamenti LCD Display (16x2) - Microcontrollore}
     \label{tab:lcd-16x2-connections}
     \begin{tabular}{ll}
         \toprule
-        \textbf{LCD Pin} & \textbf{Microcontrollore Pin}                  \\
+        \textbf{LCD Pin} & \textbf{Microcontrollore Pin}      \\
         \midrule
-        RS               & Pin 13                                         \\
-        E                & Pin 9                                          \\
-        D4               & Pin 6                                          \\
-        D5               & Pin 5                                          \\
-        D6               & Pin 7                                          \\
-        D7               & Pin 4                                          \\
-        VSS              & GND                                            \\
-        VDD              & 5V                                             \\
-        RW               & GND                                            \\
-        A (Anodo)        & 5V (attraverso un resistore da 220 \(\Omega\)) \\
-        K (Catodo)       & GND                                            \\
+        RS               & Pin 13                             \\
+        E                & Pin 9                              \\
+        D4               & Pin 6                              \\
+        D5               & Pin 5                              \\
+        D6               & Pin 7                              \\
+        D7               & Pin 4                              \\
+        VSS              & GND                                \\
+        VDD              & 5V                                 \\
+        RW               & GND                                \\
+        A (Anodo)        & 5V (attraverso resistenza da 220 \(\Omega\)) \\
+        K (Catodo)       & GND                                \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \subsection{Ricevitore Infrarossi (IR)}
-Il modulo ricevitore IR decodifica i codici inviati dal telecomando per gestire i comandi di gioco.\\
-Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\label{subsec:setup-ir}
+Collegamenti tra il modulo ricevitore IR e il microcontrollore:
+
 \begin{table}[H]
     \centering
-    \caption{Connessioni IR Receiver Module - Microcontrollore}
+    \caption{Collegamenti IR Receiver Module - Microcontrollore}
     \label{tab:ir-receiver-connections}
     \begin{tabular}{ll}
         \toprule
@@ -232,11 +307,12 @@ Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
 \end{table}
 
 \subsection{Encoder Rotativo}
-L'encoder rotativo serve per regolare manualmente la velocità di caduta dei tetramini.\\
-Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
+\label{subsec:setup-encoder}
+Collegamenti tra l'encoder rotativo e il microcontrollore:
+
 \begin{table}[H]
     \centering
-    \caption{Connessioni Rotary Encoder Module - Microcontrollore}
+    \caption{Collegamenti Rotary Encoder Module - Microcontrollore}
     \label{tab:rotary-encoder-connections}
     \begin{tabular}{ll}
         \toprule
@@ -244,14 +320,13 @@ Di seguito sono riportate le connessioni tra il modulo e il microcontrollore.
         \midrule
         CLK                  & Pin 2                         \\
         DT                   & Pin 8                         \\
-        SW (Switch)          & Non usato                     \\
+        SW (Switch)          & Non utilizzato                \\
         VCC                  & 5V                            \\
         GND                  & GND                           \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-
-
+% Appendici potrebbero essere aggiunte qui
 
 \end{document}
