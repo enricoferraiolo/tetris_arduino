@@ -414,8 +414,8 @@ version = 1
 firmware = "percorso del file firmware.hex"
 elf      = "percorso del file firmware.elf"
 \end{verbatim}
-    \item Avviare il simulatore con \texttt{Wokwi: Start Simulator} dal \textbf{Command Palette}.
-    \item Wokwi caricherà automaticamente lo schema in \texttt{diagram.json} insieme al firmware appena compilato.
+    \item Avviare il simulatore con il comando \texttt{Wokwi: Start Simulator} dal \textbf{Command Palette} di VSCode.
+    \item Wokwi caricherà automaticamente lo schema in \texttt{diagram.json} insieme al firmware appena compilato e una nuova finestra interattiva del simulatore verrà aperta.
 \end{enumerate}
 
 \subsection{Hardware Reale}
@@ -424,16 +424,11 @@ elf      = "percorso del file firmware.elf"
           \begin{lstlisting}
 #define PRODUCTION  true
     \end{lstlisting}
-    \item Collegare la scheda Elegoo UNO R3 via USB al PC.
-    \item Dal \textbf{Command Palette}, selezionare \texttt{PlatformIO: Upload}.
-          PlatformIO compilerà e caricherà il firmware direttamente sulla board.
-    \item Verificare che il programma parta correttamente: il display a matrice e il LCD mostreranno lo stato del gioco.
+    \item Collegare la scheda al PC
+    \item Aprire Arduino IDE
+    \item Selezionare la scheda \texttt{Arduino UNO} e la porta COM corretta
+    \item Iniettare il codice sulla scheda
 \end{enumerate}
-
-\subsection{Note su Wokwi \& PlatformIO}
-Per lavorare in entrambe le modalità è sufficiente mantenere la cartella aperta come progetto PlatformIO: VS Code riconosce automaticamente il file \texttt{platformio.ini} e propone le azioni di build/upload nella barra inferiore.
-La netlist del circuito per Wokwi è definita in \texttt{diagram.json} e non richiede ulteriori modifiche.
-Per modificare i codici infrarossi utilizzati dal telecomando in ambiente simulato o reale, fare riferimento a \texttt{lib/ir\_utils/ir\_utils.h}.
 
 
 
