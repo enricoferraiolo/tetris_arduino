@@ -61,8 +61,9 @@ struct Tetromino
   int height;
 };
 
-// Definizione delle forme dei tetromini
-const Tetromino TETROMINO_SHAPES[7] = {
+// Definizione delle forme dei tetramini
+const int TETROMINO_SHAPES_COUNT = 7;
+const Tetromino TETROMINO_SHAPES[TETROMINO_SHAPES_COUNT] = {
     // Ogni bit a 1 rappresenta un LED accesso sulla riga x
     {{0b1111, 0, 0, 0}, 4, 1}, // I
     {{0b0111, 0b0100}, 3, 2},  // J
@@ -277,7 +278,7 @@ bool checkCollision(int newX, int newY)
 
 void spawnNewPiece()
 {
-  currentPiece = TETROMINO_SHAPES[random(7)];
+  currentPiece = TETROMINO_SHAPES[random(TETROMINO_SHAPES_COUNT)];
   posX = 3;
   posY = 0;
 
