@@ -34,6 +34,9 @@
 % Supporto per tabelle e figure
 \usepackage{forest}
 
+% Bibliografia
+\usepackage{biblatex}
+
 
 %%% CONFIGURAZIONI %%%
 % Configurazione hyperref
@@ -45,6 +48,8 @@
     citecolor=green,
     urlcolor=cyan
 }
+
+\addbibresource{bib.bib}
 
 % Definizione comandi personalizzati
 \newcommand{\RedBlock}{\colorbox{red}{\rule{1.2ex}{1.2ex}}}      % blocco pieno rosso
@@ -58,21 +63,22 @@
     stringstyle=\color{red},
     breaklines=true,
     showstringspaces=false
-}
+    }
+    
+    %%% INFORMAZIONI SUL DOCUMENTO %%%
+    \title{\textbf{RELAZIONE: \\ Tetris Arduino}}
+    \author{Enrico Ferraiolo 0001191698}
+    \date{}
+    
+    %%% INIZIO DOCUMENTO %%%
+    \begin{document}
+    
 
-%%% INFORMAZIONI SUL DOCUMENTO %%%
-\title{\textbf{RELAZIONE: \\ Tetris Arduino}}
-\author{Enrico Ferraiolo 0001191698}
-\date{}
-
-%%% INIZIO DOCUMENTO %%%
-\begin{document}
-
-% Frontespizio
-\maketitle
-
-\begin{center}
-    \textbf{Laurea Magistrale in Informatica}\\
+    % Frontespizio
+    \maketitle
+    
+    \begin{center}
+        \textbf{Laurea Magistrale in Informatica}\\
     \vspace{0.3cm}
     Corso: Laboratorio di Making\\
     a.a. 2024-2025
@@ -348,8 +354,9 @@ I file sono identici se non per la riga di codice che definisce se il progetto �
 \end{itemize}
 
 La differenziazione data da questa riga di codice è necessaria per gestire i codici infrarossi generati dal telecomando nei due ambienti.\\
-Infatti, per il simulatore (Wokwi), i codici infrarossi sono diversi rispetto a quelli inviati dal telecomando reale.\\
-Se si volesse cambiare il telecomando, basterebbe rimappare i codici di production (\texttt{PRODUCTION\_CODES}) nel file \texttt{lib/utils/utils.h}.
+Infatti, per il simulatore (Wokwi \cite{wokwi}), i codici infrarossi sono diversi rispetto a quelli inviati dal telecomando reale.\\
+Se si volesse cambiare il telecomando, basterebbe rimappare i codici di production (\texttt{PRODUCTION\_CODES}) nel file \texttt{lib/utils/utils.h}, per la modalità simulatore,
+oppure, per la modalità hardware reale, nel file \texttt{src/main/utils.h} per la modalità hardware reale.\\
 
 \subsection{Struttura del Progetto}
 \label{subsec:progetto-struttura}
@@ -404,8 +411,8 @@ Di seguito è riportata la struttura delle directory e dei file principali:\\
 Di seguito sono riportati i passaggi per eseguire il progetto in modalità simulatore.
 \begin{enumerate}
     \item Aprire VSCode
-    \item Installare l'estensione \href{https://marketplace.visualstudio.com/items?itemName=Wokwi.wokwi-vscode}{Wokwi}
-    \item Installare l'estensione \href{https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide}{PlatformIO}
+    \item Installare l'estensione \href{https://marketplace.visualstudio.com/items?itemName=Wokwi.wokwi-vscode}{Wokwi} \cite{wokwi}
+    \item Installare l'estensione \href{https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide}{PlatformIO} \cite{platformio}
     \item Aprire la cartella \texttt{tetris-arduino} come progetto PlatformIO all'interno di VSCode
     \item In \texttt{src/main.cpp}, verificare che sia presente:
           \begin{lstlisting}
@@ -470,5 +477,9 @@ Il simulatore offre anch'esso la possibilità di visualizzare il monitor seriale
     \label{fig:fine_gioco}
 \end{figure}
 
+
+\newpage
+\addcontentsline{toc}{chapter}{Bibliografia}
+\printbibliography
 
 \end{document}
