@@ -102,6 +102,8 @@ void toggleGamePause();
 void toggleGameActive();
 void handleEncoderChange();
 void encoderISR();
+Tetromino rotateTetrominoClockwise(Tetromino &piece);
+Tetromino rotateTetrominoCounterClockwise(Tetromino &piece);
 
 void setup()
 {
@@ -381,6 +383,68 @@ void resetGame()
   spawnNewPiece();
 }
 
+Tetromino rotateTetrominoClockwise(Tetromino &piece)
+{
+  Tetromino rotated = piece;
+  // resetto la forma
+  for (int i = 0; i < 4; i++)
+    rotated.shape[i] = 0;
+  // applico la rotazione 90°
+  for (int y = 0; y < piece.height; y++)
+  {
+    for (int x = 0; x < piece.width; x++)
+    {
+      if (bitRead(piece.shape[y], x))
+      {
+        bitSet(rotated.shape[x], piece.height - 1 - y);
+      }
+    }
+  }
+  // scambio dimensioni
+  rotated.width = piece.height;
+  rotated.height = piece.width;
+
+  // Verifica collisioni
+  if (checkCollision(posX, posY))
+  {
+    // Se c'è collisione, restituisco il pezzo originale
+    rotated = piece;
+  }
+
+  return rotated;
+}
+
+Tetromino rotateTetrominoCounterClockwise(Tetromino &piece)
+{
+  Tetromino rotated = piece;
+  // resetto la forma
+  for (int i = 0; i < 4; i++)
+    rotated.shape[i] = 0;
+  // applico la rotazione -90°
+  for (int y = 0; y < piece.height; y++)
+  {
+    for (int x = 0; x < piece.width; x++)
+    {
+      if (bitRead(piece.shape[y], x))
+      {
+        bitSet(rotated.shape[piece.width - 1 - x], y);
+      }
+    }
+  }
+  // scambio dimensioni
+  rotated.width = piece.height;
+  rotated.height = piece.width;
+
+  // Verifica collisioni
+  if (checkCollision(posX, posY))
+  {
+    // Se c'è collisione, restituisco il pezzo originale
+    rotated = piece;
+  }
+
+  return rotated;
+}
+
 void translateIR()
 {
   // Debug raw code
@@ -427,21 +491,35 @@ void translateIR()
   {
     if (strcmp(buttonName, "VOL+") == 0)
     {
-      // Aumenta velocità
-      if (fallSpeed > MIN_FALL_SPEED)
+      // Rotazione in senso orario del tetromino
+      Tetromino rotatedPiece = rotateTetrominoClockwise(currentPiece);
+      if (!checkCollision(posX, posY))
       {
-        fallSpeed -= SPEED_INCREMENT;
+        Serial.println("ROTATO A DESTRA");
+        currentPiece = rotatedPiece;
+        drawMatrix();
       }
-      updateSpeedDisplay();
     }
     else if (strcmp(buttonName, "VOL-") == 0)
     {
-      // Diminuisci velocità
-      if (fallSpeed < MAX_FALL_SPEED)
+      // Rotazione in senso antiorario del tetromino
+      Tetromino rotatedPiece = rotateTetrominoCounterClockwise(currentPiece);
+      if (!checkCollision(posX, posY))
       {
-        fallSpeed += SPEED_INCREMENT;
+        Serial.println("ROTATO A SINISTRA");
+        currentPiece = rotatedPiece;
+        drawMatrix();
       }
-      updateSpeedDisplay();
+    }
+    else if (strcmp(buttonName, "PLAY") == 0)
+    {
+      // Sposta in giù
+      if (!checkCollision(posX, posY + 1))
+      {
+        Serial.println("SPOSTO IN GIU'");
+        posY++;
+      }
+      drawMatrix();
     }
     else if (strcmp(buttonName, "FAST BACK") == 0)
     {
@@ -547,3 +625,4 @@ void toggleGameActive()
     initializeLCD();
   }
 }
+
