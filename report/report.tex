@@ -94,7 +94,7 @@ completando linee orizzontali per ottenere punti.
 L'obiettivo di questo progetto è realizzare una versione giocabile su Arduino di Tetris, utilizzando:
 \begin{itemize}
     \item un display a matrice LED 8x8 (MAX7219) per il campo di gioco
-    \item un display LCD 16x2 per visualizzare punteggio e stato
+    \item un display LCD 16x2 per visualizzare il punteggio e lo stato
     \item un telecomando IR e un encoder rotativo per i controlli
 \end{itemize}
 
@@ -110,14 +110,13 @@ Il microcontrollore utilizzato è il \textbf{Elegoo UNO R3}, una scheda equivale
 
 \subsection{Display a matrice LED - Campo di Gioco}
 \label{subsec:display-matrice}
-Il display a matrice LED è un modulo \textbf{MAX7219} con configurazione 8x8. Ogni LED della matrice può essere controllato individualmente, consentendo di:
+Il display a matrice LED è un modulo \textbf{MAX7219} con configurazione 8x8. Ogni LED della matrice rappresenta una singola cella del campo di gioco e può essere controllato individualmente, consentendo di:
 \begin{itemize}
     \item visualizzare il campo di gioco
     \item rappresentare i tetramini in movimento
     \item mostrare le celle occupate
 \end{itemize}
 
-Ogni LED rappresenta una singola cella del campo di gioco.
 
 \subsection{Display LCD - Informazioni di Gioco}
 \label{subsec:display-lcd}
@@ -254,11 +253,11 @@ Collegamenti tra il modulo MAX7219 e il microcontrollore:
 
 \begin{table}[H]
     \centering
-    \caption{Collegamenti Matrix (MAX7219) - Microcontrollore}
+    \caption{Collegamenti matrice LED (MAX7219) - Microcontrollore}
     \label{tab:matrix-max7219-connections}
     \begin{tabular}{ll}
         \toprule
-        \textbf{Matrix Pin} & \textbf{Microcontrollore Pin} \\
+        \textbf{Matrice LED Pin} & \textbf{Microcontrollore Pin} \\
         \midrule
         VCC                 & 5V                            \\
         GND                 & GND                           \\
@@ -275,11 +274,11 @@ Collegamenti tra il modulo LCD 1602 e il microcontrollore:
 
 \begin{table}[H]
     \centering
-    \caption{Collegamenti LCD Display (16x2) - Microcontrollore}
+    \caption{Collegamenti display LCD (16x2) - Microcontrollore}
     \label{tab:lcd-16x2-connections}
     \begin{tabular}{ll}
         \toprule
-        \textbf{LCD Pin} & \textbf{Microcontrollore Pin}                \\
+        \textbf{Display LCD Pin} & \textbf{Microcontrollore Pin}                \\
         \midrule
         RS               & Pin 13                                       \\
         E                & Pin 9                                        \\
@@ -302,11 +301,11 @@ Collegamenti tra il modulo ricevitore IR e il microcontrollore:
 
 \begin{table}[H]
     \centering
-    \caption{Collegamenti IR Receiver Module - Microcontrollore}
+    \caption{Collegamenti modulo IR - Microcontrollore}
     \label{tab:ir-receiver-connections}
     \begin{tabular}{ll}
         \toprule
-        \textbf{IR Pin} & \textbf{Microcontrollore Pin} \\
+        \textbf{Modulo IR Pin} & \textbf{Microcontrollore Pin} \\
         \midrule
         VCC             & 5V                            \\
         GND             & GND                           \\
@@ -321,11 +320,11 @@ Collegamenti tra l'encoder rotativo e il microcontrollore:
 
 \begin{table}[H]
     \centering
-    \caption{Collegamenti Rotary Encoder Module - Microcontrollore}
+    \caption{Collegamenti encoder rotativo - Microcontrollore}
     \label{tab:rotary-encoder-connections}
     \begin{tabular}{ll}
         \toprule
-        \textbf{Encoder Pin} & \textbf{Microcontrollore Pin} \\
+        \textbf{Encoder Rotativo Pin} & \textbf{Microcontrollore Pin} \\
         \midrule
         CLK                  & Pin 2                         \\
         DT                   & Pin 8                         \\
@@ -349,7 +348,7 @@ I file sono identici se non per la riga di codice che definisce se il progetto �
 \end{itemize}
 
 La differenziazione data da questa riga di codice è necessaria per gestire i codici infrarossi generati dal telecomando nei due ambienti.\\
-Infatti, per il simulatore Wokwi, i codici infrarossi sono diversi rispetto a quelli inviati dal telecomando reale.\\
+Infatti, per il simulatore (Wokwi), i codici infrarossi sono diversi rispetto a quelli inviati dal telecomando reale.\\
 Se si volesse cambiare il telecomando, basterebbe rimappare i codici di production (\texttt{PRODUCTION\_CODES}) nel file \texttt{lib/utils/utils.h}.
 
 \subsection{Struttura del Progetto}
