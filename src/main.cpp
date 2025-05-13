@@ -90,6 +90,7 @@ void initializeLCD();
 void initializeActiveMap();
 void initializeEncoder();
 bool checkCollision(int newX, int newY);
+bool checkCollision(int newX, int newY, const Tetromino &p);
 void spawnNewPiece();
 void mergePiece();
 void clearLines();
