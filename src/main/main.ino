@@ -65,13 +65,13 @@ struct Tetromino
 const int TETROMINO_SHAPES_COUNT = 7;
 const Tetromino TETROMINO_SHAPES[TETROMINO_SHAPES_COUNT] = {
     // Ogni bit a 1 rappresenta un LED accesso sulla riga x
-    {{0b1111, 0, 0, 0}, 4, 1}, // I
-    {{0b0111, 0b0100}, 3, 2},  // J
-    {{0b1110, 0b0010}, 3, 2},  // L
-    {{0b0110, 0b0110}, 2, 2},  // O
-    {{0b0111, 0b0010}, 3, 2},  // S
-    {{0b1100, 0b0110}, 3, 2},  // T
-    {{0b1110, 0b1000}, 3, 2}   // Z
+    {{0b1111, 0, 0, 0}, 4, 1},      // I
+    {{0b0111, 0b0100, 0, 0}, 3, 2}, // J
+    {{0b0111, 0b0001, 0, 0}, 3, 2}, // L
+    {{0b0011, 0b0011, 0, 0}, 2, 2}, // O
+    {{0b0111, 0b0010, 0, 0}, 3, 2}, // S
+    {{0b0110, 0b0011, 0, 0}, 3, 2}, // T
+    {{0b0011, 0b0110, 0, 0}, 3, 2}  // Z
 };
 
 // Variabili di gioco
