@@ -98,8 +98,8 @@ After injecting the code into the board, you can play the game using the followi
 - `FAST FORWARD`: Move the piece to the right
 - `PAUSE`: Toggle the game pause on/off 
   - During "Game Over" state, this button will restart the game
-- `VOl+`: Increase the speed of the game
-- `VOL-`: Decrease the speed of the game
+- `VOl+`: Rotate the piece clockwise
+- `VOL-`: Rotate the piece counter-clockwise
 
 #### 🔁 Rotary Encoder Controls:
 - `Rotate Clockwise`: Increase the speed of the game

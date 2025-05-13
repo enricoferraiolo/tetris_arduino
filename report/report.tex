@@ -143,14 +143,14 @@ Il telecomando IR consente di inviare istruzioni a distanza tramite segnali infr
     \label{tab:ir-functions}
     \begin{tabular}{ll}
         \toprule
-        \textbf{Tasto} & \textbf{Funzione}                    \\
+        \textbf{Tasto} & \textbf{Funzione}                           \\
         \midrule
-        POWER          & Accensione/spegnimento del gioco     \\
-        FAST BACK      & Movimento del tetramino a sinistra   \\
-        FAST FORWARD   & Movimento del tetramino a destra     \\
-        PAUSE          & Pausa/ripresa del gioco              \\
-        VOL+           & Aumento della velocità di caduta     \\
-        VOL-           & Diminuzione della velocità di caduta \\
+        POWER          & Accensione/spegnimento del gioco            \\
+        FAST BACK      & Movimento del tetramino a sinistra          \\
+        FAST FORWARD   & Movimento del tetramino a destra            \\
+        PAUSE          & Pausa/ripresa del gioco                     \\
+        VOL+           & Rotazione del tetramino in senso orario     \\
+        VOL-           & Rotazione del tetramino in senso antiorario \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -187,35 +187,35 @@ I tetramini implementati nel gioco sono rappresentati nella Tabella \ref{tab:tet
             l               % Rappresentazione
         }
         \toprule
-        Pezzo & Codici binari                                      & W\(\times\)H & Forma \\
+        Pezzo & Codici binari                                                                                       & W\(\times\)H & Forma \\
         \midrule
         I     & \makecell{\texttt{0b1111}                                                 \\}
               & 4\(\times\)1
-              & \makecell{\RedBlock\RedBlock\RedBlock\RedBlock}                           \\
+              & \makecell{\RedBlock\RedBlock\RedBlock\RedBlock}                                                                            \\
         \addlinespace
-        J     & \makecell{\texttt{0b0111}                                                 \\\texttt{0b0100}}
+        J     & \makecell{\texttt{0b0111}                                                                                                  \\\texttt{0b0100}}
               & 3\(\times\)2
-              & \makecell{\WhiteBlock\RedBlock\RedBlock\RedBlock                          \\\WhiteBlock\WhiteBlock\WhiteBlock\RedBlock} \\
+              & \makecell{\WhiteBlock\RedBlock\RedBlock\RedBlock                                                                           \\\WhiteBlock\WhiteBlock\WhiteBlock\RedBlock} \\
         \addlinespace
-        L     & \makecell{\texttt{0b0111}                                                 \\\texttt{0b0001}}
+        L     & \makecell{\texttt{0b0111}                                                                                                  \\\texttt{0b0001}}
               & 3\(\times\)2
-              & \makecell{\RedBlock\RedBlock\RedBlock\WhiteBlock                          \\\RedBlock\WhiteBlock\WhiteBlock\WhiteBlock} \\
+              & \makecell{\RedBlock\RedBlock\RedBlock\WhiteBlock                                                                           \\\RedBlock\WhiteBlock\WhiteBlock\WhiteBlock} \\
         \addlinespace
-        O     & \makecell{\texttt{0b0011}                                                 \\\texttt{0b0011}}
+        O     & \makecell{\texttt{0b0011}                                                                                                  \\\texttt{0b0011}}
               & 2\(\times\)2
-              & \makecell{\WhiteBlock\RedBlock\RedBlock\WhiteBlock                        \\\WhiteBlock\RedBlock\RedBlock\WhiteBlock} \\
+              & \makecell{\WhiteBlock\RedBlock\RedBlock\WhiteBlock                                                                         \\\WhiteBlock\RedBlock\RedBlock\WhiteBlock} \\
         \addlinespace
-        S     & \makecell{\texttt{0b0111}                                                 \\\texttt{0b0010}}
+        S     & \makecell{\texttt{0b0111}                                                                                                  \\\texttt{0b0010}}
               & 3\(\times\)2
-              & \makecell{\WhiteBlock\RedBlock\RedBlock\RedBlock                          \\\WhiteBlock\WhiteBlock\RedBlock\WhiteBlock} \\
+              & \makecell{\WhiteBlock\RedBlock\RedBlock\RedBlock                                                                           \\\WhiteBlock\WhiteBlock\RedBlock\WhiteBlock} \\
         \addlinespace
-        T     & \makecell{\texttt{0b0110}                                                 \\\texttt{0b0011}}
+        T     & \makecell{\texttt{0b0110}                                                                                                  \\\texttt{0b0011}}
               & 3\(\times\)2
-              & \makecell{\WhiteBlock\RedBlock\RedBlock\WhiteBlock                        \\\RedBlock\RedBlock\WhiteBlock\WhiteBlock} \\
+              & \makecell{\WhiteBlock\RedBlock\RedBlock\WhiteBlock                                                                         \\\RedBlock\RedBlock\WhiteBlock\WhiteBlock} \\
         \addlinespace
-        Z     & \makecell{\texttt{0b0011}                                                 \\\texttt{0b0110}}
+        Z     & \makecell{\texttt{0b0011}                                                                                                  \\\texttt{0b0110}}
               & 3\(\times\)2
-              & \makecell{\RedBlock\RedBlock\WhiteBlock\WhiteBlock                          \\\WhiteBlock\RedBlock\RedBlock\WhiteBlock} \\
+              & \makecell{\RedBlock\RedBlock\WhiteBlock\WhiteBlock                                                                         \\\WhiteBlock\RedBlock\RedBlock\WhiteBlock} \\
         \bottomrule
     \end{tabular}
 \end{table}
