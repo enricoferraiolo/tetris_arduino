@@ -252,6 +252,27 @@ void initializeActiveMap()
   }
 }
 
+// Controlla collisione di un pezzo arbitrario p in (newX,newY)
+bool checkCollision(int newX, int newY, const Tetromino &p)
+{
+  for (int y = 0; y < p.height; y++)
+  {
+    for (int x = 0; x < p.width; x++)
+    {
+      if (bitRead(p.shape[y], x))
+      {
+        int gX = newX + x;
+        int gY = newY + y;
+        if (gX < 0 || gX >= 8 || gY >= 8)
+          return true;
+        if (gY >= 0 && bitRead(grid[gY], gX))
+          return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool checkCollision(int newX, int newY)
 {
   for (int y = 0; y < currentPiece.height; y++)
@@ -493,22 +514,30 @@ void translateIR()
     {
       // Rotazione in senso orario del tetromino
       Tetromino rotatedPiece = rotateTetrominoClockwise(currentPiece);
-      if (!checkCollision(posX, posY))
+      if (!checkCollision(posX, posY, rotatedPiece))
       {
         Serial.println("ROTATO A DESTRA");
         currentPiece = rotatedPiece;
         drawMatrix();
+      }
+      else
+      {
+        Serial.println("Collisione, non ruoto");
       }
     }
     else if (strcmp(buttonName, "VOL-") == 0)
     {
       // Rotazione in senso antiorario del tetromino
       Tetromino rotatedPiece = rotateTetrominoCounterClockwise(currentPiece);
-      if (!checkCollision(posX, posY))
+      if (!checkCollision(posX, posY, rotatedPiece))
       {
         Serial.println("ROTATO A SINISTRA");
         currentPiece = rotatedPiece;
         drawMatrix();
+      }
+      else
+      {
+        Serial.println("Collisione, non ruoto");
       }
     }
     else if (strcmp(buttonName, "PLAY") == 0)
@@ -625,4 +654,3 @@ void toggleGameActive()
     initializeLCD();
   }
 }
-
